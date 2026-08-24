@@ -277,7 +277,14 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
         comments: this.menu.comments,
         room: this.table.selectedRoom,
       };
-      if (!this.auth.cashier && !numberOfPax && this.table.takeAwayTable == 0) {
+      // Mesa #28: guest-first — never block on customer/pax for any role or order type.
+      if (!customerName) {
+        creatingInvoice.customer = "Walk-in Customer";
+      }
+      if (!creatingInvoice.mode_of_payment) {
+        creatingInvoice.mode_of_payment = "Cash";  // Mesa #28: punch-time placeholder; real mode at settle
+      }
+      if (false && !this.auth.cashier && !numberOfPax && this.table.takeAwayTable == 0) {
         this.alert.createAlert(
           "Message",
           "Please Select Customer / No of Pax",

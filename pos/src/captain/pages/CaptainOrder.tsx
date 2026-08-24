@@ -191,10 +191,7 @@ export default function CaptainOrder() {
       // live E2E test — a 500 "missing 1 required positional argument:
       // 'customer'" — not just a Cashier-UI convention). Match OrderPanel's
       // exact validate-before-submit gate rather than only omitting the field.
-      if (!selectedCustomer?.name) {
-        showToast.error('Please select a customer before sending the order.');
-        return;
-      }
+      // Mesa #28: guest-first — fall back to Walk-in Customer.
 
       setIsSubmitting(true);
 

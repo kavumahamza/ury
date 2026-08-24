@@ -81,7 +81,8 @@ def resolve_restaurant_menu(branch, room=None, order_type=None, cashier=False):
         "URY Menu Item",
         filters={"parent": menu, "disabled": 0},
         fields=["item", "item_name", "rate", "special_dish", "disabled", "course"],
-        order_by="item_name asc"
+        order_by="item_name asc",
+        parent_doctype="URY Menu",
     )
 
     menu_items_with_image = [
@@ -924,7 +925,10 @@ def getAggregatorMOP(aggregator):
     )
     return modeOfPaymentsList
 @frappe.whitelist()
-def create_customer(customer_name, mobile_number=None, customer_group="Individual", territory="India"):
+def create_customer(customer_name, mobile_number=None, customer_group="Individual", territory=None):
+    import frappe as _f
+    if not territory or not _f.db.exists("Territory", territory):
+        territory = _f.db.get_single_value("Selling Settings", "territory") or _f.db.get_value("Territory", {"is_group": 0}, "name") or "All Territories"
     if not frappe.has_permission("Customer", "create"):
         frappe.throw("Not permitted to create customers", frappe.PermissionError)
         

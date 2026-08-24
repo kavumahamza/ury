@@ -87,10 +87,8 @@ const OrderPanel = () => {
           showToast.error(t('errors.select_aggregator'));
           return;
         }
-      } else if (!selectedCustomer?.name) {
-        showToast.error(t('errors.select_customer'));
-        return;
       }
+      // Mesa #28: guest-first — no forced customer; fall back to Walk-in Customer.
 
       // Validate table selection for dine-in orders
       if (selectedOrderType === DINE_IN && !selectedTable) {
@@ -113,7 +111,7 @@ const OrderPanel = () => {
         order_type: selectedOrderType,
         table: selectedTable || undefined,
         room: selectedRoom || undefined,
-        customer: selectedOrderType === 'Aggregators' ? selectedAggregator?.customer : selectedCustomer?.name,
+        customer: selectedOrderType === 'Aggregators' ? selectedAggregator?.customer : (selectedCustomer?.name || 'Walk-in Customer'),
         aggregator_id: selectedOrderType === 'Aggregators' ? selectedAggregator?.customer : undefined,
         cashier: posProfile.cashier,
         owner: posProfile.owner,
