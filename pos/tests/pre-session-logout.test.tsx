@@ -156,6 +156,20 @@ describe('pre-session logout', () => {
     expect(location.href).toBe('/login');
   });
 
+  it('preserves checked items and remarks when logout fails', async () => {
+    await render();
+    await act(async () => container.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click());
+    const remarks = container.querySelector<HTMLInputElement>('input[type="text"]')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(remarks, 'Float counted');
+      remarks.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    request.mockRejectedValueOnce(new Error('Offline'));
+    await act(async () => button('Logout').click());
+    expect(container.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked).toBe(true);
+    expect(container.querySelector<HTMLInputElement>('input[type="text"]')!.value).toBe('Float counted');
+  });
+
   it('allows logout while the opening checklist cannot load', async () => {
     vi.mocked(getChecklist).mockRejectedValue(new Error('Checklist unavailable'));
     await render();
