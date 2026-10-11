@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Button, Input, Spinner, cn } from '@ury/ui';
 import { t } from '../i18n';
 import {
@@ -12,6 +12,7 @@ interface ChecklistGateDialogProps {
   posProfile: string;
   checklistType: 'Opening' | 'Closing';
   onComplete: () => void;
+  logoutAction?: ReactNode;
 }
 
 interface ChecklistRowState {
@@ -58,7 +59,7 @@ const toRowState = (items: ChecklistItem[]): ChecklistRowState[] =>
  * mount, renders each item with a mandatory marker and an optional remarks
  * field, and submits once every mandatory item is checked.
  */
-const ChecklistGateDialog = ({ posProfile, checklistType, onComplete }: ChecklistGateDialogProps) => {
+const ChecklistGateDialog = ({ posProfile, checklistType, onComplete, logoutAction }: ChecklistGateDialogProps) => {
   const [rows, setRows] = useState<ChecklistRowState[]>([]);
   const [logName, setLogName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -196,6 +197,7 @@ const ChecklistGateDialog = ({ posProfile, checklistType, onComplete }: Checklis
             </Button>
           </>
         )}
+        {logoutAction && <div className="mt-4 flex justify-center">{logoutAction}</div>}
       </div>
     </div>
   );
