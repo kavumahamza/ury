@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +39,7 @@ interface POSClosingDialogProps {
    * submission), right before the dialog itself closes.
    */
   onClosingSubmitted?: () => void | Promise<void>;
+  logoutAction?: ReactNode;
 }
 
 interface OpeningBalanceDetail {
@@ -207,7 +208,7 @@ function buildRows(
   return Array.from(rows.values());
 }
 
-const POSClosingDialog = ({ open, onOpenChange, onClosingSubmitted }: POSClosingDialogProps) => {
+const POSClosingDialog = ({ open, onOpenChange, onClosingSubmitted, logoutAction }: POSClosingDialogProps) => {
   const { posProfile, paymentModes } = usePOSStore();
   const { user } = useRootStore();
   const blindCashCount = isBlindCashCount(posProfile);
@@ -515,6 +516,7 @@ const POSClosingDialog = ({ open, onOpenChange, onClosingSubmitted }: POSClosing
           posProfile={posProfile.name}
           checklistType="Closing"
           onComplete={handleClosingChecklistComplete}
+          logoutAction={logoutAction}
         />
         {/*
           Fix 5: the POS Closing doc is already submitted at this point --
@@ -614,6 +616,7 @@ const POSClosingDialog = ({ open, onOpenChange, onClosingSubmitted }: POSClosing
         )}
 
         <DialogFooter>
+          {logoutAction}
           <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
             {t('common.cancel')}
           </Button>

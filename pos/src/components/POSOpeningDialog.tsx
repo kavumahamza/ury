@@ -22,6 +22,7 @@ interface POSOpeningDialogProps {
   canAccessDesk: boolean;
   onRetry: () => void;
   onContinue: () => void;
+  logoutAction?: ReactNode;
   /**
    * Only meaningful for state='dailyClosePending'. When provided, this
    * cashier has POS Closing Entry submit permission on the pending session
@@ -52,6 +53,7 @@ const POSOpeningDialog = ({
   onRetry,
   onContinue,
   onCloseNow,
+  logoutAction,
 }: POSOpeningDialogProps) => {
   const handleSwitchToDesk = () => {
     window.open(`${window.location.origin}/app`, '_blank');
@@ -162,6 +164,7 @@ const POSOpeningDialog = ({
                 {t('pos.switch_to_desk')}
               </Button>
             )}
+            {logoutAction}
           </div>
         </div>
       </div>

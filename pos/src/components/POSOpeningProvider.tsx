@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { LogOut } from 'lucide-react';
+import { Button, showToast } from '@ury/ui';
+import { logoutSession, clearAppStorage } from '@ury/core';
 import {
   checkPOSOpening,
   parseFrappeError,
@@ -68,6 +71,30 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
   // blocking dialog -- renders the real POSClosingDialog instead of just
   // telling them to contact a manager.
   const [showClosingDialog, setShowClosingDialog] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const logoutPending = useRef(false);
+
+  const handleLogout = async () => {
+    if (logoutPending.current) return;
+    logoutPending.current = true;
+    setLoggingOut(true);
+    try {
+      await logoutSession((window as Window & { csrf_token?: string }).csrf_token);
+      clearAppStorage();
+      window.location.href = '/login';
+    } catch {
+      showToast.error(t('errors.failed_logout'));
+      logoutPending.current = false;
+      setLoggingOut(false);
+    }
+  };
+
+  const logoutAction = (
+    <Button variant="outline" onClick={handleLogout} disabled={loggingOut}>
+      <LogOut className="w-4 h-4 mr-2" />
+      {t('header.logout')}
+    </Button>
+  );
 
   const { posProfile, showVoluntaryClosing, setShowVoluntaryClosing } = usePOSStore();
   const { user } = useRootStore();
@@ -225,6 +252,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t('common.checking_pos_status')}</p>
+          <div className="mt-4">{logoutAction}</div>
         </div>
       </div>
     );
@@ -238,6 +266,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
           if (!open) setShowClosingDialog(false);
         }}
         onClosingSubmitted={handleClosingSuccess}
+        logoutAction={logoutAction}
       />
     );
   }
@@ -249,6 +278,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
         message={blockingMessage}
         existingEntry={existingEntry}
         canAccessDesk={canAccessDesk}
+        logoutAction={logoutAction}
         onRetry={() => checkPOSStatus()}
         onContinue={() => setBlockingState(null)}
         onCloseNow={
@@ -266,6 +296,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
       <ChecklistGateDialog
         posProfile={posProfile.name}
         checklistType="Opening"
+        logoutAction={logoutAction}
         onComplete={() => {
           setNeedsOpeningChecklist(false);
           checkPOSStatus(existingEntry || undefined);
