@@ -67,9 +67,9 @@ const POSOpeningScreen = ({ onSuccess, onError, onContinue }: POSOpeningScreenPr
   };
 
   const sessionStart = useMemo(() => {
-    const timestamp = context?.session_start || new Date().toISOString();
+    const timestamp = context?.occupied_entry?.period_start_date || context?.session_start || new Date().toISOString();
     return new Date(timestamp).toLocaleString();
-  }, [context?.session_start]);
+  }, [context?.occupied_entry?.period_start_date, context?.session_start]);
 
   const loadContext = async (posProfile?: string) => {
     setIsLoading(true);
