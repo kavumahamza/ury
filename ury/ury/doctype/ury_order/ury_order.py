@@ -2025,6 +2025,7 @@ def make_invoice(customer, payments, cashier, pos_profile,owner, additionalDisco
 
     if invoice.custom_merged_pos_invoice:
         target = frappe.get_doc("POS Invoice", invoice.custom_merged_pos_invoice)
+        target.cashier = frappe.session.user
         target.calculate_taxes_and_totals()
         
         doc_req = invoice.rounded_total

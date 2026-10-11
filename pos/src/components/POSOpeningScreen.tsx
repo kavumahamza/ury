@@ -157,7 +157,7 @@ const POSOpeningScreen = ({ onSuccess, onError, onContinue }: POSOpeningScreenPr
     blockingError === BLOCKING_ERROR_NONE &&
     context?.selected_profile != null;
 
-  const canContinue = !isLoading && !loggingOut && !context?.daily_close_pending &&
+  const canContinue = !isLoading && !loggingOut &&
     context?.occupied_entry?.joinable === true && !!context.occupied_entry.name &&
     !!context.selected_profile && !!onContinue;
 
