@@ -115,7 +115,7 @@ describe('shared till continuation', () => {
     expect(container.textContent).not.toContain('POS workspace');
     expect(container.textContent).toContain('Count float');
     vi.mocked(getChecklist).mockResolvedValue({ items: [], logName: 'LOG-1', logStatus: 'Complete' });
-    vi.mocked(submitChecklist).mockResolvedValue({ status: 'Complete', log_name: 'LOG-1' });
+    vi.mocked(submitChecklist).mockResolvedValue({ status: 'Complete', name: 'LOG-1' });
     await act(async () => container.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click());
     await act(async () => container.querySelector<HTMLButtonElement>('button')!.click());
     expect(container.textContent).toContain('POS workspace');
@@ -128,6 +128,16 @@ describe('shared till continuation', () => {
     await act(async () => continueButton().click());
     expect(container.textContent).not.toContain('POS workspace');
     expect(getChecklist).not.toHaveBeenCalled();
+  });
+
+  it('explains a pending daily close through the existing gate instead of silently hiding Continue', async () => {
+    vi.mocked(getPOSOpeningContext).mockResolvedValue({ ...context, daily_close_pending: true });
+    await render();
+    vi.mocked(validatePOSClose).mockResolvedValue({ message: 'Failed' });
+    await act(async () => continueButton().click());
+    expect(container.textContent).not.toContain('POS workspace');
+    expect(container.textContent).toContain("Yesterday's session was never closed");
+    expect(createPOSOpening).not.toHaveBeenCalled();
   });
 
   it('keeps own-opening resume working without a Continue screen', async () => {

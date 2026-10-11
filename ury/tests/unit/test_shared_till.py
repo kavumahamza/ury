@@ -204,3 +204,32 @@ def test_settlement_records_authenticated_operator_not_client_or_original_cashie
     assert invoice.owner == "waiter@example.com"
     assert invoice.waiter == "waiter@example.com"
     invoice.submit.assert_called_once_with()
+
+
+def test_merged_settlement_attributes_both_paid_invoices_to_operator(runtime, monkeypatch):
+    invoice = MagicMock()
+    invoice.cashier = "opener@example.com"
+    invoice.custom_merged_pos_invoice = "INV-PRIMARY"
+    invoice.restaurant_table = None
+    invoice.rounded_total = 10000
+    target = MagicMock()
+    target.cashier = "first-profile-user@example.com"
+    target.restaurant_table = None
+    target.rounded_total = 15000
+    target.owner = "waiter@example.com"
+    target.waiter = "waiter@example.com"
+    monkeypatch.setattr(runtime.order, "get_order_invoice", lambda *args: invoice)
+    monkeypatch.setattr(runtime.order, "_validate_additional_discount", lambda *args: None)
+    runtime.frappe.get_doc.return_value = target
+    persisted_cashiers = []
+    target.save.side_effect = lambda **kwargs: persisted_cashiers.append(target.cashier)
+    runtime.order.make_invoice(
+        "Walk-in", [{"mode_of_payment": "Cash", "amount": 25000}],
+        "forged@example.com", "POS-1", "forged@example.com", invoice="INV-SECONDARY",
+    )
+    assert target.cashier == "operator@example.com"
+    assert invoice.cashier == "operator@example.com"
+    assert persisted_cashiers == ["operator@example.com"]
+    assert target.owner == "waiter@example.com"
+    assert target.waiter == "waiter@example.com"
+    target.append.assert_called_once_with("payments", {"mode_of_payment": "Cash", "amount": 15000.0})
