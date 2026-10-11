@@ -88,7 +88,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
     []
   );
 
-  const checkPOSStatus = useCallback(async () => {
+  const checkPOSStatus = useCallback(async (resumeEntry?: POSOpeningEntryRef) => {
     if (!posProfile) return;
 
     setIsLoading(true);
@@ -97,7 +97,9 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
     setNeedsOpeningChecklist(false);
 
     try {
-      const response = await checkPOSOpening(user?.name);
+      const response = resumeEntry
+        ? { message: [resumeEntry] }
+        : await checkPOSOpening(user?.name);
 
       // No open entry for this user -> show the native opening screen.
       if (response.message === 1) {
@@ -247,7 +249,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
         message={blockingMessage}
         existingEntry={existingEntry}
         canAccessDesk={canAccessDesk}
-        onRetry={checkPOSStatus}
+        onRetry={() => checkPOSStatus()}
         onContinue={() => setBlockingState(null)}
         onCloseNow={
           blockingState === 'dailyClosePending'
@@ -266,7 +268,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
         checklistType="Opening"
         onComplete={() => {
           setNeedsOpeningChecklist(false);
-          checkPOSStatus();
+          checkPOSStatus(existingEntry || undefined);
         }}
       />
     );
@@ -277,6 +279,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
       <POSOpeningScreen
         onSuccess={handleOpeningSuccess}
         onError={handleScreenError}
+        onContinue={(entry) => checkPOSStatus(entry)}
       />
     );
   }

@@ -1999,6 +1999,7 @@ def make_invoice(customer, payments, cashier, pos_profile,owner, additionalDisco
 
     invoice.customer = customer
     invoice.pos_profile = pos_profile
+    invoice.cashier = frappe.session.user
     
     if additionalDiscount:
         discount_val = frappe.utils.flt(additionalDiscount)
