@@ -240,6 +240,11 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
     checkPOSStatus();
   }, [clearBlockingState, checkPOSStatus]);
 
+  const handleOpeningChecklistComplete = useCallback(() => {
+    setNeedsOpeningChecklist(false);
+    checkPOSStatus(existingEntry || undefined);
+  }, [checkPOSStatus, existingEntry]);
+
   useEffect(() => {
     if (posProfile) {
       checkPOSStatus();
@@ -297,10 +302,7 @@ const POSOpeningProvider = ({ children }: POSOpeningProviderProps) => {
         posProfile={posProfile.name}
         checklistType="Opening"
         logoutAction={logoutAction}
-        onComplete={() => {
-          setNeedsOpeningChecklist(false);
-          checkPOSStatus(existingEntry || undefined);
-        }}
+        onComplete={handleOpeningChecklistComplete}
       />
     );
   }
