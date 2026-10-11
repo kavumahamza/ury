@@ -54,6 +54,17 @@ async function renderContext(data = context) {
 }
 
 describe('occupied till message', () => {
+  it.each([true, false])('shows the occupied opening time in the Session Start badge (joinable=%s)', async (joinable) => {
+    await renderContext({
+      ...context,
+      session_start: '2026-10-01 12:00:00',
+      occupied_entry: { ...context.occupied_entry!, joinable },
+    });
+    const badge = Array.from(container.querySelectorAll('div.inline-flex'))
+      .find((element) => element.textContent?.startsWith('Session Start:'));
+    expect(badge?.textContent).toBe(`Session Start: ${new Date('2026-10-01T08:10:00').toLocaleString()}`);
+  });
+
   it('formats the start time for humans rather than showing the raw database timestamp', async () => {
     const formatDate = vi.spyOn(Date.prototype, 'toLocaleString');
     const message = await renderContext();

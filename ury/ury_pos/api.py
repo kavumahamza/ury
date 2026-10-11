@@ -1407,6 +1407,16 @@ def get_pos_opening_screen_data(pos_profile: str | None = None) -> dict:
             entry_doc = frappe.get_doc("POS Opening Entry", entry["name"])
             if frappe.has_permission("POS Opening Entry", "read", doc=entry_doc):
                 occupied_entry["name"] = entry["name"]
+                profile_doc = frappe.get_doc("POS Profile", pos_profile_name)
+                assigned = any(row.user == user for row in profile_doc.applicable_for_users or [])
+                billing_roles = {row.role for row in profile_doc.role_allowed_for_billing or []}
+                if assigned and (not billing_roles or billing_roles.intersection(frappe.get_roles(user))):
+                    start, end = _business_day_bounds(
+                        profile_doc.branch, default_hours=5, now=frappe.utils.now_datetime()
+                    )
+                    opened_at = frappe.utils.get_datetime(entry["period_start_date"])
+                    if start <= opened_at < end:
+                        occupied_entry["joinable"] = True
 
     # Currency information for display.
     company_currency = None

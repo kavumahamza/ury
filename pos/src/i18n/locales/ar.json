@@ -131,6 +131,9 @@
     },
     "pos_opening": {
         "occupied_till": "{{profile}} مفتوح باسم {{holder}} منذ {{since}}؛ يجب على {{holder}} إغلاق الوردية، أو على المدير إغلاقها في Desk.",
+        "occupied_title": "الصندوق مفتوح بالفعل",
+        "joinable_till": "فتح {{holder}} الصندوق منذ {{since}}",
+        "continue": "متابعة",
         "another_cashier": "أمين صندوق آخر"
     },
     "errors": {
