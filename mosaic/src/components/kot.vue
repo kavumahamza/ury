@@ -179,7 +179,7 @@
               </div>
             
           </div>
-          <footer class="kot-actions mt-4 border-t border-gray-200 pt-4" :class="{ 'ring-2 ring-blue-600 rounded-lg': kot.isRotated }">
+          <footer @click.self="kot.isRotated && rotateCard(kot)" class="kot-actions mt-4 border-t border-gray-200 pt-4" :class="{ 'ring-2 ring-blue-600 rounded-lg': kot.isRotated }">
             <button
               v-if="!pendingServes[kot.name]"
               @click.stop="
