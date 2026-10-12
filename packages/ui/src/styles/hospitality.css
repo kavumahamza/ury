@@ -24,20 +24,12 @@
     --gray-700: 24 16% 24%;
     --gray-800: 24 18% 19%;
     --gray-900: 24 18% 15%;
-    /* React inherits its brand primary. Legacy Vue has no semantic primary,
-       so its focus fallback uses the existing Maximus purple, not a new accent. */
-    --ring: var(--primary, 263.8095 96.9231% 61.7647%);
   }
 
   @media (prefers-color-scheme: light) {
     html[data-ury-theme="hospitality"]:not(.dark) body {
       background-color: hsl(var(--background));
       color: hsl(var(--foreground));
-    }
-    html[data-ury-theme="hospitality"]:not(.dark) :is(h1, h2, h3) {
-      font-family: Georgia, 'Times New Roman', serif;
-      line-height: 1.25;
-      overflow-wrap: anywhere;
     }
   }
 }
@@ -49,22 +41,6 @@
   @media (prefers-color-scheme: light) {
     html[data-ury-theme="hospitality"]:not(.dark) #app > .bg-slate-300 {
       background-color: hsl(var(--background));
-    }
-  }
-
-  html[data-ury-theme="hospitality"] :is(button, a, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 3px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html[data-ury-theme="hospitality"] *:not(.animate-spin),
-    html[data-ury-theme="hospitality"] *::before,
-    html[data-ury-theme="hospitality"] *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
     }
   }
 }
