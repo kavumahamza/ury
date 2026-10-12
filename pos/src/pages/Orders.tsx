@@ -376,17 +376,18 @@ export default function Orders() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-full min-h-0 overflow-hidden">
       {/* Left Sidebar - Order Types */}
-      <OrderStatusSidebar
-        selectedStatus={selectedStatus}
-        setSelectedStatus={setSelectedStatus}
-      />
+      <div className="w-48 shrink-0 [&>div]:w-full [&_nav]:p-3">
+        <OrderStatusSidebar
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+        />
+      </div>
 
       {/* Middle Section - Order Cards */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
-        <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-4 bg-gray-50 p-4 pb-40 xl:grid-cols-[minmax(0,1fr)_14rem] xl:grid-rows-1">
-          <div className="min-w-0 overflow-y-auto">
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 overflow-y-auto bg-gray-50 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,1fr)] lg:grid-rows-[minmax(0,1fr)_auto] lg:overflow-hidden xl:grid-cols-[minmax(20rem,1.2fr)_minmax(22rem,1fr)_minmax(16rem,0.8fr)] xl:grid-rows-1">
+          <div className="min-h-0 min-w-0 overflow-y-auto lg:col-start-1 lg:row-start-1">
           <BillRequestStrip orders={error ? [] : orders} selectOrder={selectOrder} />
           {error ? (
             <div className="p-4 text-center">
@@ -497,7 +498,7 @@ export default function Orders() {
 
                       {/* Total - pushed to bottom like MenuCard */}
                       <div className="mt-auto pt-2">
-                        <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                        <span className="text-lg font-semibold text-gray-900 tabular-nums">
                           {formatCurrency(cardTotal)}
                         </span>
                       </div>
@@ -539,12 +540,8 @@ export default function Orders() {
             </div>
           )}
           </div>
-          <Notifications title="Notifications" onOpenCheck={openNotificationCheck} />
-        </div>
-      </div>
-
-      {/* Right Section - Order Details */}
-      <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+      {/* Selected bill stays in the workspace flow before general alerts. */}
+      <div className="flex min-h-96 min-w-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:min-h-0 xl:row-span-1">
         {!selectedOrder ? (
           <div className="text-center h-full flex flex-col items-center justify-center text-gray-500 p-6">
             <p className="text-lg font-medium mb-2">{t('order.select_to_view')}</p>
@@ -562,9 +559,9 @@ export default function Orders() {
         ) : (
           <>
             {/* Fixed Header */}
-            <div className="sticky top-0 start-0 end-0 z-20 border-b border-gray-200 bg-white px-6 py-4">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="min-w-0 flex-1 truncate text-xl font-semibold text-gray-900">
+            <div className="sticky top-0 start-0 end-0 z-20 border-b border-gray-200 bg-white px-4 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="min-w-0 flex-1 break-words text-lg font-semibold text-gray-900">
                   {selectedOrder.name}
                 </h2>
                 <div className="flex shrink-0 items-center gap-2">
@@ -664,7 +661,7 @@ export default function Orders() {
               </DialogContent>
             </Dialog>
             {/* Scrollable Content Area */}
-            <div className="flex-1 overflow-y-auto p-6 pb-40">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">
               <SplitGroupPanel
                 invoiceName={selectedOrder.name}
                 onOpenInvoice={openRelatedInvoice}
@@ -709,12 +706,12 @@ export default function Orders() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('order.items_title')}</h3>
                 <div className="space-y-3">
                   {selectedOrderItems.map((item, index) => (
-                    <div key={index} className="flex justify-between items-start py-2 border-b border-gray-100">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{item.item_name}</p>
+                    <div key={index} className="flex justify-between items-start gap-3 py-2 border-b border-gray-100">
+                      <div className="min-w-0 flex-1">
+                        <p className="break-words text-sm font-medium text-gray-900">{item.item_name}</p>
                         <p className="text-xs text-gray-500">Qty: {item.qty}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="shrink-0 text-right tabular-nums">
                         <p className="text-sm font-semibold text-gray-900">
                           {formatCurrency(item.amount)}
                         </p>
@@ -743,7 +740,7 @@ export default function Orders() {
             </div>
 
             {/* Sticky Bottom Section: Print | Split | Settle | Total */}
-            <div className="border-t border-gray-200 p-6 bg-gray-50 sticky bottom-0 start-0 end-0 z-10">
+            <div className="border-t border-gray-200 p-4 bg-gray-50 sticky bottom-0 start-0 end-0 z-10">
               <div className="flex flex-wrap items-center gap-3 w-full">
                 {/* Print Bill / Receipt Button */}
                 <Button
@@ -781,7 +778,7 @@ export default function Orders() {
                   </Button>
                 )}
                 {/* Total */}
-                <span className="ms-auto text-xl font-bold text-gray-900 whitespace-nowrap">
+                <span className="ms-auto text-2xl font-bold text-gray-900 whitespace-nowrap tabular-nums">
                   {isMergedBill(selectedOrder) ? (
                     <span className="flex flex-col items-end leading-tight">
                       <span className="text-xs font-medium text-gray-500">{t('bill_merge.combined_total')}</span>
@@ -795,6 +792,10 @@ export default function Orders() {
             </div>
           </>
         )}
+      </div>
+      <div className="min-h-0 min-w-0 lg:col-start-1 lg:row-start-2 xl:col-start-3 xl:row-start-1">
+        <Notifications title="Notifications" onOpenCheck={openNotificationCheck} />
+      </div>
       </div>
       {showPaymentDialog && selectedOrder && (
         <PaymentDialog

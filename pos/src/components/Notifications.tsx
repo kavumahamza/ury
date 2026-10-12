@@ -176,7 +176,7 @@ function UserNotifications({ user, title = 'Recent Notifications', onOpenCheck }
   }
 
   return (
-    <section aria-label={title} className="flex max-h-48 min-w-0 flex-col rounded-lg border border-gray-200 bg-white p-3 xl:max-h-full">
+    <section aria-label={title} className="flex max-h-60 min-w-0 flex-col rounded-lg border border-gray-200 bg-white p-4 xl:h-full xl:max-h-full">
       <div className="flex shrink-0 items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-semibold"><Bell className="h-4 w-4 text-blue-600" />{title}</h2>
         <button className="min-h-11 px-2 text-sm text-blue-700 underline" onClick={() => refreshRef.current()}>Refresh</button>
@@ -192,9 +192,19 @@ function UserNotifications({ user, title = 'Recent Notifications', onOpenCheck }
           {notifications.map(notification => {
             const href = recordLink(notification);
             const unread = !Number(notification.read);
-            return <li key={notification.name} className="min-w-0 py-2 text-xs">
-              <p className={`break-words ${unread ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>{readableText(notification.subject)}</p>
-              {notification.email_content && <p className="break-words text-gray-600">{readableText(notification.email_content)}</p>}
+            const subject = readableText(notification.subject);
+            const headline = subject.length > 96 ? `${subject.slice(0, 96).trimEnd()}…` : subject;
+            return <li key={notification.name} className="min-w-0 py-3 text-sm">
+              <details>
+                <summary className="min-h-11 cursor-pointer rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+                  <span className={`break-words ${unread ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>{headline}</span>
+                  <span className="mt-1 block text-xs text-gray-600">Full notification</span>
+                </summary>
+                <div className="mt-2 space-y-2 break-words rounded-md bg-gray-50 p-3 text-gray-700">
+                  <p>{subject}</p>
+                  {notification.email_content && <p>{readableText(notification.email_content)}</p>}
+                </div>
+              </details>
               <div className="mt-1 flex flex-wrap gap-x-2 text-gray-500">
                 <span>{unread ? 'Unread' : 'Read'}</span>
                 <time dateTime={notification.creation.replace(' ', 'T')} title={notification.creation}>{getRelativeTime(notification.creation, serverTimeOffset)}</time>
