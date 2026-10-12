@@ -1,0 +1,99 @@
+{
+  "issue": "https://github.com/Maximus-Tech-Enterprise-Apps/maximus-siteops/issues/3286",
+  "captured_on": "2026-10-12",
+  "context": "Synthetic local actual-source Vue Table/Menu rendering, native CSS, safe synthetic store boundaries, no live ERP",
+  "capture_method": "User-authorized isolated Chrome renderer; fresh temporary browser profile, no user session reuse",
+  "source_base": "1e690ffaef45a46b4306e2e9f674fdb71bb6e693",
+  "source_implementation": "b774118e8fe27753a4e6d6eb1a7abec17f1f6c49",
+  "viewport_method": "Exact native-size iframe; document dimensions labelled in image; no CSS scaling or transformation",
+  "dataset": "Identical synthetic table states, supported ages, long dish names, UGX amounts, neutral SVG images labelled synthetic and native initials fallback",
+  "limits": [
+    "No live waiter/order/session/permission acceptance",
+    "No painted keyboard-focus screenshot",
+    "No before tablet or table tablet screenshot",
+    "No approved Salama menu photo assignment or licensing claim",
+    "Screenshots contain a labelled evidence wrapper around the actual components; not a deployed full-session capture"
+  ],
+  "images": [
+    {
+      "file": "waiter-menu-after-1024.png",
+      "sha256": "da95efb45da493a50dda1da837b2215327dd929a18bcb37f1469c82613e3e21c",
+      "bytes": 82544,
+      "raster_pixels": {
+        "width": 1098,
+        "height": 860
+      },
+      "document_viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "source_revision": "b774118e8fe27753a4e6d6eb1a7abec17f1f6c49",
+      "screen": "menu",
+      "phase": "after"
+    },
+    {
+      "file": "waiter-menu-after-1366.png",
+      "sha256": "20f7d57b6937d852eee6d1ae6a147d251cf1bada9aec6e7073c2fd9df9bda8da",
+      "bytes": 84623,
+      "raster_pixels": {
+        "width": 1440,
+        "height": 860
+      },
+      "document_viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "source_revision": "b774118e8fe27753a4e6d6eb1a7abec17f1f6c49",
+      "screen": "menu",
+      "phase": "after"
+    },
+    {
+      "file": "waiter-menu-before-1366.png",
+      "sha256": "3328234c464cbbfef098b9038ecea23b1357494be29d87b66db7cb39b82a0dad",
+      "bytes": 73887,
+      "raster_pixels": {
+        "width": 1440,
+        "height": 860
+      },
+      "document_viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "source_revision": "1e690ffaef45a46b4306e2e9f674fdb71bb6e693",
+      "screen": "menu",
+      "phase": "before"
+    },
+    {
+      "file": "waiter-tables-after-1366.png",
+      "sha256": "3a9c62ab7609bd60bfab13e2312344489e4709f98c294de832b508df2a2358b0",
+      "bytes": 82597,
+      "raster_pixels": {
+        "width": 1440,
+        "height": 860
+      },
+      "document_viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "source_revision": "b774118e8fe27753a4e6d6eb1a7abec17f1f6c49",
+      "screen": "tables",
+      "phase": "after"
+    },
+    {
+      "file": "waiter-tables-before-1366.png",
+      "sha256": "bf4711b32880a7064727a4277d81a2685130cda80d9c2d2c34677cca8b1047e3",
+      "bytes": 74791,
+      "raster_pixels": {
+        "width": 1440,
+        "height": 860
+      },
+      "document_viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "source_revision": "1e690ffaef45a46b4306e2e9f674fdb71bb6e693",
+      "screen": "tables",
+      "phase": "before"
+    }
+  ]
+}
