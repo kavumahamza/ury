@@ -202,23 +202,54 @@ test("elapsed labels distinguish hours and minutes without changing timing state
   }
 });
 
-test("long-ticket height reserves native header, toolbar and action-error space", async t => {
+for (const actionError of ["", "Synthetic network unavailable"]) {
+test(`long tickets expose every item before the footer without an inner scroll${actionError ? " during an action error" : ""}`, async t => {
   const { host, vm } = fixture(t);
+  vm.actionError = actionError;
+  vm.kot[0].kot_items = Array.from({ length: 12 }, (_, index) => ({
+    name: `LONG-${index}`, item_name: `Preparation dish ${index + 1}`, qty: 2, quantity: 2,
+    comments: `Preparation note ${index + 1}`, serve_priority: index + 1,
+  }));
   await Vue.nextTick();
   const card = host.querySelector(".kot-card");
-  const reserve = () => {
-    const value = window.getComputedStyle(card).maxHeight;
-    const match = value.match(/calc\(100dvh - (\d+)px\)/);
-    assert.ok(match, "Card height must be bounded against the viewport");
-    return Number(match[1]);
-  };
-  // Native Header + board padding + Recall toolbar place the first row at 165px.
-  // Keep 24px below that row so its footer and late ring remain inside768px.
-  assert.ok(reserve() >= 189, "Native header and Recall toolbar must fit above the card");
-  const normalReserve = reserve();
-  vm.actionError = "Synthetic network unavailable";
-  await Vue.nextTick();
-  assert.ok(reserve() >= normalReserve + 80, "The action error must not push native actions below the screen");
-  assert.equal(window.getComputedStyle(host.querySelector(".check")).overflowY, "auto");
-  assert.equal(window.getComputedStyle(host.querySelector("footer")).flexShrink, "0");
+  const body = card.querySelector(".check"), footer = card.querySelector("footer");
+  for (const element of [card, body]) {
+    const computed = window.getComputedStyle(element);
+    assert.ok(["", "none"].includes(computed.maxHeight), "Ticket content must grow rather than hide behind a height cap");
+    assert.ok(["", "visible"].includes(computed.overflowY), "Ticket content must not scroll or clip independently of the board");
+  }
+  assert.equal(body.querySelectorAll(".kot-item").length, 12);
+  assert.ok(body.textContent.includes("Preparation note 12"));
+  assert.ok(body.compareDocumentPosition(footer) & window.Node.DOCUMENT_POSITION_FOLLOWING);
+  assert.equal(window.getComputedStyle(footer).position, "", "Serve must stay in the ticket flow after all items");
 });
+}
+
+test("Takeaway and order identity do not break inside words beside an hour-long age", async t => {
+  const { host, vm } = fixture(t);
+  vm.kot[0].tableortakeaway = "Takeaway";
+  vm.kot[0].timeRemaining = "1 : 5";
+  await Vue.nextTick();
+  const identity = host.querySelector(".kot-identity");
+  assert.ok(identity.textContent.includes("Takeaway"));
+  assert.equal(host.querySelector(".kot-age").textContent.trim(), "1 h 05 min LATE");
+  assert.equal(window.getComputedStyle(identity).overflowWrap, "normal", "Table/order identity must wrap only at word boundaries");
+  assert.notEqual(window.getComputedStyle(identity).wordBreak, "break-all");
+});
+
+for (const type of ["Cancelled", "Partially cancelled"]) {
+test(`${type} order and item notes are cancellation remarks, not special requests`, async t => {
+  const { host, vm } = fixture(t, type);
+  vm.kot[0].comments = "Guest cancelled this order";
+  vm.kot[0].kot_items[0].comments = "One portion cancelled";
+  await Vue.nextTick();
+  const notes = [...host.querySelectorAll(".kot-note")];
+  assert.equal(notes.length, 2);
+  for (const note of notes) {
+    assert.match(note.textContent, /cancellation remarks/i);
+    assert.doesNotMatch(note.textContent, /special request/i);
+    assert.ok(Number(window.getComputedStyle(note).fontWeight) >= 600);
+  }
+  assert.ok(host.querySelector("footer").textContent.includes("Confirm"));
+});
+}
