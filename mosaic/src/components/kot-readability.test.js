@@ -141,3 +141,30 @@ test("Masonry receives only visible tickets for the selected production unit", a
   assert.match(layoutItems[0].textContent, /T-07/);
   assert.doesNotMatch(host.textContent, /BAR-ONLY|HIDDEN-TABLE/);
 });
+
+
+test("highlighted ticket footer background dismisses the existing header selection", async t => {
+  const { host, vm } = fixture(t);
+  await Vue.nextTick();
+  const header = host.querySelector(".kot-header");
+  const footer = host.querySelector("footer");
+  header.click(); await Vue.nextTick();
+  assert.equal(vm.kot[0].isRotated, true);
+  assert.ok(footer.classList.contains("ring-2"));
+  footer.click(); await Vue.nextTick();
+  assert.equal(vm.kot[0].isRotated, false, "Footer background must dismiss the selected ticket highlight");
+  assert.ok(!footer.classList.contains("ring-2"));
+  footer.click(); await Vue.nextTick();
+  assert.equal(vm.kot[0].isRotated, false, "Unselected footer background must not select a ticket");
+});
+
+test("native Confirm button does not bubble into the footer dismiss gesture", async t => {
+  const { host, vm, requests } = fixture(t, "Partially cancelled");
+  vm.call.post = async (method, args) => { requests.push({ method, args }); throw new Error("Synthetic network unavailable"); };
+  await Vue.nextTick();
+  host.querySelector(".kot-header").click(); await Vue.nextTick();
+  assert.equal(vm.kot[0].isRotated, true);
+  findText(host, "Confirm").click(); await Vue.nextTick();
+  assert.equal(vm.kot[0].isRotated, true, "Button activation must remain separate from background dismissal");
+  assert.deepEqual(requests, [{ method: "ury.ury.api.ury_kot_display.confirm_cancel_kot", args: { name: "KOT-041" } }]);
+});
