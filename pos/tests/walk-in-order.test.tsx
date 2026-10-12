@@ -51,9 +51,10 @@ async function submit() { await render(); await act(async () => submitButton().c
 it.each(['Take Away', 'Dine In'])('submits anonymous %s for native customer resolution', async type => {
   state.selectedOrderType = type; state.selectedTable = type === 'Dine In' ? 'Table 1' : null;
   await submit();
-  expect(syncOrder).toHaveBeenCalledWith(expect.objectContaining({ customer: undefined, order_type: type,
+  expect(syncOrder).toHaveBeenCalledWith(expect.objectContaining({ customer: '', order_type: type,
     table: state.selectedTable || undefined, no_of_pax: 2, pos_profile: 'POS-1', waiter: 'waiter@example.com',
     items: [{ item: 'SOUP', item_name: 'Soup', rate: 18000, qty: 1, comment: undefined }] }));
+  expect(JSON.parse(JSON.stringify(vi.mocked(syncOrder).mock.calls[0][0]))).toHaveProperty('customer', '');
   expect(state.resetOrderState).toHaveBeenCalledOnce(); expect(showToast.success).toHaveBeenCalledOnce();
 });
 it.each([false, true])('preserves explicit customer and invoice metadata (update=%s)', async updating => {
@@ -66,7 +67,7 @@ it.each([false, true])('preserves explicit customer and invoice metadata (update
 });
 it('leaves an anonymous invoice update identity to the native endpoint', async () => {
   state.isUpdatingOrder = true; await submit();
-  expect(syncOrder).toHaveBeenCalledWith(expect.objectContaining({ customer: undefined, invoice: 'INV-1', last_invoice: 'INV-1', last_modified_time: state.lastModifiedTime }));
+  expect(syncOrder).toHaveBeenCalledWith(expect.objectContaining({ customer: '', invoice: 'INV-1', last_invoice: 'INV-1', last_modified_time: state.lastModifiedTime }));
 });
 it.each(['Delivery', 'Phone In'])('requires a selected customer for %s', async type => {
   state.selectedOrderType = type; await submit();
