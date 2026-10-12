@@ -115,7 +115,7 @@
                   :class="kot.timecolor"
                   class="kot-age font-inter font-semibold leading-10"
                 >
-                  {{ kot.timeRemaining }}
+                  {{ Number((kot.timeRemaining || '0:0').split(':')[0]) ? Number((kot.timeRemaining || '0:0').split(':')[0]) + ' h ' : '' }}{{ Number((kot.timeRemaining || '0:0').split(':')[1]) }} min
                   <span v-if="kot.late" class="block text-sm text-red-700 leading-4">LATE</span>
                 </div>
               </div>
@@ -126,7 +126,7 @@
               >
                 ( Duplicate KOT ( CHECK WITH CAPTAIN ) )
               </div>
-              <div v-show="kot.comments" class="kot-note text-[#6B7280] font-medium">
+              <div v-show="kot.comments" class="kot-note">
                 ( {{ kot.comments }} )
               </div>
               <div></div>
@@ -169,7 +169,7 @@
                   <div>
                     <p
                       v-show="kotitem.comments"
-                      class="kot-note text-[#6B7280] font-medium"
+                      class="kot-note"
                     >
                       {{ kotitem.comments }}
                     </p>
@@ -807,10 +807,17 @@ export default {
   margin-bottom: 28px;
 }
 .kot-card {
-  padding: 20px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 140px);
+}
+.kot-card > .check {
+  min-height: 0;
+  overflow-y: auto;
 }
 .kot-header {
-  gap: 16px;
+  gap: 8px;
   align-items: flex-start;
 }
 .kot-identity,
@@ -825,12 +832,12 @@ export default {
 }
 .kot-age {
   flex-shrink: 0;
-  font-size: 32px;
+  font-size: 28px;
   white-space: nowrap;
 }
 .kot-item {
-  gap: 12px;
-  padding-top: 12px;
+  gap: 8px;
+  padding-top: 6px;
 }
 .kot-quantity {
   flex-shrink: 0;
@@ -843,12 +850,17 @@ export default {
   line-height: 1.4;
 }
 .kot-note {
-  margin-top: 10px;
+  margin-top: 6px;
+  color: #111827;
+  font-weight: 700;
   font-size: 18px;
-  line-height: 1.5;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 .kot-actions {
+  flex-shrink: 0;
+  margin-top: 8px;
+  padding-top: 8px;
   font-size: 18px;
 }
 .kot-board button {
@@ -859,9 +871,14 @@ export default {
     width: calc((100% - 28px) / 2);
   }
 }
-@media (min-width: 1280px) {
+@media (min-width: 1024px) {
   .kot-ticket {
     width: calc((100% - 56px) / 3);
+  }
+}
+@media (min-width: 1280px) {
+  .kot-ticket {
+    width: calc((100% - 84px) / 4);
   }
 }
 </style>
