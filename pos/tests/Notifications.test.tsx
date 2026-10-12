@@ -240,3 +240,48 @@ describe('shared native operational notifications (Dashboard consumer)', () => {
     expect(panel().textContent).not.toContain('Food ready');
   });
 });
+
+// Long native rich text belongs behind a persistent disclosure, not in the
+// initial alert scan. These exercise the real shared Dashboard consumer.
+describe('compact notification disclosure', () => {
+  const subject = 'Food ready: Table 12 — collect the complete kitchen order and verify the preparation notes before taking every dish to the guest table.';
+  const content = 'Two soups without chilli. Please collect the remaining dishes from the kitchen pass and confirm all special requests with the waiter.';
+
+  it('keeps a short initial headline and an accessible complete plain-text message', async () => {
+    rows = [alert({ subject: `<b>${subject}</b>`, email_content: `<p>${content}</p><script>bad()</script>` })];
+    await render();
+    const disclosure = panel().querySelector('details');
+    expect(disclosure, 'long notifications need a full-content disclosure').not.toBeNull();
+    const summary = disclosure!.querySelector('summary')!;
+    expect(disclosure!.open).toBe(false);
+    expect(summary.textContent?.length).toBeLessThan(subject.length);
+    expect(summary.textContent).toContain('Food ready: Table 12');
+    expect(summary.textContent).not.toContain(content);
+    await act(async () => summary.click());
+    expect(disclosure!.open).toBe(true);
+    expect(disclosure!.textContent).toContain(subject);
+    expect(disclosure!.textContent).toContain(content);
+    expect(disclosure!.textContent).not.toContain('bad()');
+    expect(disclosure!.querySelector('script,b')).toBeNull();
+    expect(panel().querySelector('a')?.getAttribute('href')).toBe('/app/ury-kot/KOT-1');
+    await click('Mark read');
+    expect(panel().textContent).not.toContain('Unread');
+    expect(disclosure!.open).toBe(true);
+  });
+
+  it('retains expanded content and disclosure focus when another alert arrives', async () => {
+    rows = [alert({ subject, email_content: content })];
+    await render();
+    const disclosure = panel().querySelector('details');
+    expect(disclosure).not.toBeNull();
+    const summary = disclosure!.querySelector('summary')!;
+    await act(async () => summary.click());
+    summary.focus();
+    rows = [alert({ name: 'NEW', subject: 'Another kitchen alert' }), ...rows];
+    await emit('notification');
+    expect(panel().querySelectorAll('details')[1]).toBe(disclosure);
+    expect(disclosure!.open).toBe(true);
+    expect(document.activeElement).toBe(summary);
+    expect(disclosure!.textContent).toContain(content);
+  });
+});
