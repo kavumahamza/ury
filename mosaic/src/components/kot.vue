@@ -67,11 +67,11 @@
     <div
       class="grid kot-grid"
     >
-      <div v-for="kot in this.kot" :key="kot.name" class="kot-ticket masonry-item">
+      <template v-for="kot in this.kot" :key="kot.name">
+        <div v-if="!kot.showDiv && kot.production === production" class="kot-ticket masonry-item">
         <div
           :class="[kot.color, { 'ring-4 ring-red-600': kot.late }]"
           class="kot-card shadow-lg rounded-2xl"
-          v-if="!kot.showDiv && kot.production === production"
         >
           <div class="check">
               <!-- Card Header: Table Name and Order Number -->
@@ -198,7 +198,8 @@
             </div>
           </footer>
         </div>
-      </div>
+        </div>
+      </template>
     </div>
 
     <!-- Audio Alert Message -->
