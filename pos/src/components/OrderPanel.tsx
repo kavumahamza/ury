@@ -91,7 +91,7 @@ const OrderPanel = () => {
           showToast.error(t('errors.select_aggregator'));
           return;
         }
-      } else if (!selectedCustomer?.name) {
+      } else if (selectedOrderType !== DINE_IN && selectedOrderType !== 'Take Away' && !selectedCustomer?.name) {
         showToast.error(t('errors.select_customer'));
         return;
       }
@@ -117,7 +117,7 @@ const OrderPanel = () => {
         order_type: selectedOrderType,
         table: selectedTable || undefined,
         room: selectedRoom || undefined,
-        customer: selectedOrderType === 'Aggregators' ? selectedAggregator?.customer : selectedCustomer?.name,
+        customer: selectedOrderType === 'Aggregators' ? selectedAggregator?.customer : (selectedCustomer?.name ?? ''),
         aggregator_id: selectedOrderType === 'Aggregators' ? selectedAggregator?.customer : undefined,
         cashier: posProfile.cashier,
         owner: posProfile.owner,
