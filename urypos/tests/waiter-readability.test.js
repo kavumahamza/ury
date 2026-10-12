@@ -1,4 +1,8 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
+import tableSource from '../src/components/Table.vue?raw';
+import menuSource from '../src/components/Menu.vue?raw';
+import postcss from 'postcss';
+import tailwindcss from 'tailwindcss';
 import { createApp, nextTick, reactive } from 'vue';
 import Table from '../src/components/Table.vue';
 import Menu from '../src/components/Menu.vue';
@@ -14,6 +18,12 @@ vi.mock('../src/stores/frappeSdk.js', () => ({ default: {} }));
 
 let app;
 let host;
+beforeAll(async () => {
+  // Real native utility CSS: assert behaviour, not any particular class string.
+  const content = [tableSource, menuSource].map(raw => ({ raw, extension: 'vue' }));
+  const { css } = await postcss([tailwindcss({ content })]).process('@tailwind base; @tailwind utilities;', { from: undefined });
+  document.head.append(Object.assign(document.createElement('style'), { textContent: css }));
+});
 beforeEach(() => {
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
   const tables = [
@@ -23,8 +33,7 @@ beforeEach(() => {
     { name: 'Table 04', occupied: 1, state: 'Active', age: '0:18' },
   ];
   state.auth = reactive({ cashier: false, viewItemImage: true, restrictTableOrder: false, removeTableOrderItem: 1 });
-  state.table = reactive({
-    tables, filteredTables: tables, rooms: [{ name: 'Dining' }], selectedRoom: 'Dining',
+  state.table = reactive({ tables, filteredTables: tables, rooms: [{ name: 'Dining' }], selectedRoom: 'Dining',
     getBadgeText: row => row.state, getBadgeType: row => ({ Free: 'green', Occupied: 'yellow', Attention: 'red', Active: 'default' })[row.state],
     getTimeDifference: row => row.age, addToSelectedTables: vi.fn(), routeToMenu: vi.fn(), routeToCart: vi.fn(),
     handleRoomChange: vi.fn(), toggleTableTypeSwitch: vi.fn(), toggleDropdown: vi.fn(),
@@ -35,36 +44,35 @@ beforeEach(() => {
     { item: 'CHICKEN', item_name: 'Grilled chicken with garden vegetables and pepper sauce', rate: '125,000', item_image: '/safe-synthetic.svg' },
     { item: 'SOUP', item_name: 'Cream of mushroom soup', rate: '18,000', qty: 2 },
   ];
-  state.menu = reactive({
-    items, paginatedItems: items, selectedOrderType: 'Dine In', course: [], pageNumbers: [1], currentPage: 1, totalPages: 1,
+  state.menu = reactive({ items, paginatedItems: items, selectedOrderType: 'Dine In', course: [], pageNumbers: [1], currentPage: 1, totalPages: 1,
     getFullImagePath: path => path, itemNameExtract: name => name.slice(0, 2),
     addToCart: vi.fn(), incrementItemQuantity: vi.fn(), decrementItemQuantity: vi.fn(), showModal: vi.fn(),
   });
 });
 afterEach(() => { app?.unmount(); host?.remove(); vi.restoreAllMocks(); });
 function mount(component) {
-  host = document.createElement('div');
-  document.body.append(host);
-  app = createApp(component);
-  app.mount(host);
-  return host;
+  document.body.append(host = document.createElement('div'));
+  (app = createApp(component)).mount(host);
 }
 function buttonNamed(text) { return [...host.querySelectorAll('button')].find(button => button.textContent.includes(text)); }
+function pixels(value) { return (parseFloat(value) || 0) * (value.endsWith('rem') ? 16 : 1); }
 
-it('exposes occupied table navigation and cart viewing as named keyboard controls', () => {
+it('shows table identities, occupied ages and states with touchable native actions', () => {
   mount(Table);
-  const navigation = host.querySelector('button[aria-label="Open menu for Garden Terrace 02"]');
-  expect(navigation).not.toBeNull();
-  navigation.click();
+  for (const row of state.table.tables) {
+    expect(host.textContent).toContain(row.name);
+    expect(host.textContent).toContain(row.state);
+    if (row.occupied) expect(host.textContent).toContain(row.age);
+  }
+  for (const name of host.querySelectorAll('h5')) expect.soft(pixels(getComputedStyle(name).fontSize)).toBeGreaterThanOrEqual(24);
+  const age = [...host.querySelectorAll('span')].find(span => span.textContent.trim() === '0:08');
+  expect.soft(pixels(getComputedStyle(age).fontSize)).toBeGreaterThanOrEqual(16);
+  for (const button of host.querySelectorAll('button')) expect.soft(pixels(getComputedStyle(button).minHeight)).toBeGreaterThanOrEqual(44);
+  expect(host.querySelector('button[aria-label="Open menu for Garden Terrace 02"]')).not.toBeNull();
+  host.querySelector('button[aria-label="Open menu for Garden Terrace 02"]').click();
   expect(state.table.routeToMenu).toHaveBeenCalledWith(state.table.tables[1]);
-  const cart = host.querySelector('button[aria-label="View order for Garden Terrace 02"]');
-  expect(cart).not.toBeNull();
-  cart.click();
+  host.querySelector('button[aria-label="View order for Garden Terrace 02"]').click();
   expect(state.table.routeToCart).toHaveBeenCalledWith(state.table.tables[1]);
-});
-it('retains free/occupied/attention/active labels and native free-table and billing actions', () => {
-  mount(Table);
-  for (const label of ['Free', 'Occupied', 'Attention', 'Active', '0:27']) expect(host.textContent).toContain(label);
   buttonNamed('Open Table').click();
   expect(state.table.addToSelectedTables).toHaveBeenCalledWith(state.table.tables[0]);
   buttonNamed('Bill').click();
@@ -80,19 +88,26 @@ it('prevents restricted table controls from invoking native navigation', async (
   expect(state.table.routeToMenu).not.toHaveBeenCalled();
   expect(state.table.routeToCart).not.toHaveBeenCalled();
 });
-it('shows full dish names, named imagery, and a local initials fallback', () => {
+it('wraps full dish names and replaces missing images with local initials', () => {
   mount(Menu);
-  expect([...host.querySelectorAll('h2')].map(node => node.textContent.trim()))
-    .toContain(state.menu.items[0].item_name);
+  const name = [...host.querySelectorAll('h2')].find(node => node.textContent.trim() === state.menu.items[0].item_name);
+  expect(name).toBeDefined();
+  expect.soft(getComputedStyle(name).whiteSpace).not.toBe('nowrap');
+  expect.soft(getComputedStyle(name).overflow).not.toBe('hidden');
   const images = [...host.querySelectorAll('img')];
-  expect(images).toHaveLength(1);
-  expect(images[0].alt).toBe(state.menu.items[0].item_name);
+  expect.soft(images).toHaveLength(1);
+  expect.soft(images[0].alt).toBe(state.menu.items[0].item_name);
   expect(images[0].getAttribute('src')).toBe('/safe-synthetic.svg');
-  expect(host.textContent).toContain('Cr');
+  expect.soft(images.some(image => image.src.includes('dummyimage.com'))).toBe(false);
+  expect.soft(host.textContent).toContain('Cr');
   expect(host.textContent).toContain('UGX 125,000');
 });
-it('keeps add/increment/decrement and details routed to the existing menu actions', () => {
+it('keeps menu touch targets at least 44px, native actions and the printed-order guard', async () => {
   mount(Menu);
+  const quantityButtons = [...host.querySelectorAll('button')].filter(button => ['-', '+'].includes(button.textContent.trim()));
+  expect(quantityButtons).toHaveLength(2);
+  for (const control of [buttonNamed('ADD +'), ...quantityButtons, host.querySelector('input[name="qty_input"]')]) expect.soft(pixels(getComputedStyle(control).minHeight)).toBeGreaterThanOrEqual(44);
+  for (const button of quantityButtons) expect.soft(pixels(getComputedStyle(button).minWidth)).toBeGreaterThanOrEqual(44);
   buttonNamed('ADD +').click();
   expect(state.menu.addToCart).toHaveBeenCalledWith(state.menu.items[0]);
   expect(state.menu.items[0].showInput).toBe(true);
@@ -102,11 +117,10 @@ it('keeps add/increment/decrement and details routed to the existing menu action
   expect(state.menu.incrementItemQuantity).toHaveBeenCalledWith(state.menu.items[1]);
   expect(state.menu.decrementItemQuantity).toHaveBeenCalledWith(state.menu.items[1]);
   expect(state.menu.showModal).toHaveBeenCalledWith(state.menu.items[1]);
-});
-it('retains the native printed-order decrement guard', () => {
+  state.menu.decrementItemQuantity.mockClear();
   state.recentOrders.editPrintedInvoice = 1;
   state.auth.removeTableOrderItem = 0;
-  mount(Menu);
+  await nextTick();
   [...host.querySelectorAll('button')].find(button => button.textContent.trim() === '-').click();
   expect(state.menu.decrementItemQuantity).not.toHaveBeenCalled();
 });
