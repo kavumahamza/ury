@@ -5,6 +5,7 @@ import { JSDOM } from "jsdom";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
 import { compile } from "@vue/compiler-dom";
+import { parse } from "@vue/compiler-sfc";
 import * as helpers from "./kitchen-actions.js";
 
 const dom = new JSDOM("<!doctype html><html><head></head><body></body></html>", { url: "https://synthetic.test" });
@@ -18,7 +19,7 @@ const css = await postcss([tailwindcss({ content: [{ raw: source, extension: "vu
 const style = document.createElement("style");
 style.textContent = css.css;
 document.head.append(style);
-const { code } = compile(source.split("<template>")[1].split("</template>")[0], { mode: "function", prefixIdentifiers: true });
+const { code } = compile(parse(source).descriptor.template.content, { mode: "function", prefixIdentifiers: true });
 const render = new Function("Vue", code)(Vue);
 
 function fixture(t, type = "Order Modified") {
@@ -124,4 +125,19 @@ test("partial cancellation retains current and old quantity with native Confirm 
   assert.deepEqual(requests, [{ method: "ury.ury.api.ury_kot_display.confirm_cancel_kot", args: { name: "KOT-041" } }]);
   assert.match(host.querySelector('[role="alert"]').textContent, /Synthetic network unavailable/);
   assert.equal(vm.kot[0].name, ticket.name);
+});
+
+
+test("Masonry receives only visible tickets for the selected production unit", async t => {
+  const { host, vm, ticket } = fixture(t);
+  vm.kot = [
+    { ...structuredClone(ticket), name: "BAR-001", tableortakeaway: "BAR-ONLY", production: "Bar" },
+    { ...structuredClone(ticket), name: "HIDDEN-001", tableortakeaway: "HIDDEN-TABLE", showDiv: true },
+    ticket,
+  ];
+  await Vue.nextTick();
+  const layoutItems = [...host.querySelectorAll(".masonry-item")];
+  assert.equal(layoutItems.length, 1, "Other-station and hidden tickets must not reserve Masonry positions");
+  assert.match(layoutItems[0].textContent, /T-07/);
+  assert.doesNotMatch(host.textContent, /BAR-ONLY|HIDDEN-TABLE/);
 });

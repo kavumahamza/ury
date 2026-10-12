@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import * as Vue from "vue";
 import { compile } from "@vue/compiler-dom";
+import { parse } from "@vue/compiler-sfc";
 import { renderToString } from "@vue/server-renderer";
 
 // Exercise the real component methods without a DOM, site, or a test runner.
@@ -85,7 +86,7 @@ function kitchen({ connected = true } = {}) {
     return mounted;
   }
   const html = mounted => {
-    const { code } = compile(source.split("<template>")[1].split("</template>")[0], { mode: "function", prefixIdentifiers: true });
+    const { code } = compile(parse(source).descriptor.template.content, { mode: "function", prefixIdentifiers: true });
     const render = new Function("Vue", code)(Vue);
     return renderToString(Vue.createSSRApp({ data: () => mounted, computed: component.computed, render }));
   };
@@ -322,7 +323,7 @@ test("Vue reacts when the undo window ends and the request becomes in-flight", a
 
 test("the rendered card shows LATE, an Undo control, and a visible failure banner", async () => {
   const { state, ticket, component } = kitchen();
-  const { code } = compile(source.split("<template>")[1].split("</template>")[0], { mode: "function", prefixIdentifiers: true });
+  const { code } = compile(parse(source).descriptor.template.content, { mode: "function", prefixIdentifiers: true });
   const render = new Function("Vue", code)(Vue);
   ticket.late = true;
   state.actionError = "Could not serve KOT-001.";
