@@ -115,7 +115,7 @@
                   :class="kot.timecolor"
                   class="kot-age font-inter font-semibold leading-10"
                 >
-                  {{ Number((kot.timeRemaining || '0:0').split(':')[0]) ? Number((kot.timeRemaining || '0:0').split(':')[0]) + ' h ' : '' }}{{ Number((kot.timeRemaining || '0:0').split(':')[1]) }} min
+                  {{ Number((kot.timeRemaining || '0:0').split(':')[0]) ? Number((kot.timeRemaining || '0:0').split(':')[0]) + ' h ' : '' }}{{ String(Number((kot.timeRemaining || '0:0').split(':')[1])).padStart(Number((kot.timeRemaining || '0:0').split(':')[0]) ? 2 : 1, '0') }} min
                   <span v-if="kot.late" class="block text-sm text-red-700 leading-4">LATE</span>
                 </div>
               </div>
@@ -127,6 +127,7 @@
                 ( Duplicate KOT ( CHECK WITH CAPTAIN ) )
               </div>
               <div v-show="kot.comments" class="kot-note">
+                <span class="kot-note-label">Special request</span>
                 ( {{ kot.comments }} )
               </div>
               <div></div>
@@ -171,6 +172,7 @@
                       v-show="kotitem.comments"
                       class="kot-note"
                     >
+                      <span class="kot-note-label">Special request</span>
                       {{ kotitem.comments }}
                     </p>
                     <hr class="my-1 border-gray-200 mt-2" />
@@ -857,11 +859,19 @@ export default {
 }
 .kot-note {
   margin-top: 6px;
+  padding: 4px 6px;
+  border-left: 4px solid #b45309;
+  background-color: #fffbeb;
   color: #111827;
   font-weight: 700;
   font-size: 18px;
   line-height: 1.35;
   overflow-wrap: anywhere;
+}
+.kot-note-label {
+  display: block;
+  font-size: 16px;
+  line-height: 1.25;
 }
 .kot-actions {
   flex-shrink: 0;
