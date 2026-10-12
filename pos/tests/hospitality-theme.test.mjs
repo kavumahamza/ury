@@ -6,6 +6,25 @@ import postcss from 'postcss';
 import tailwind from 'tailwindcss';
 import { JSDOM } from 'jsdom';
 import preset from '../../packages/ui/tailwind-preset.js';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import ts from 'typescript';
+import vm from 'node:vm';
+import { createRequire } from 'node:module';
+import { loadModule } from '../../packages/core/test/brand-harness.mjs';
+
+const require = createRequire(import.meta.url);
+const buttonSource = ts.transpileModule(readFileSync('packages/ui/src/components/button.tsx', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+}).outputText;
+const buttonExports = {};
+vm.runInNewContext(buttonSource, { exports: buttonExports, require: (name) => name === '../lib/cn'
+  ? loadModule(resolve('packages/ui/src/lib/cn.ts'), {}, { clsx: require('clsx'), 'tailwind-merge': require('tailwind-merge') })
+  : require(name) });
+const nativeTabs = renderToStaticMarkup(React.createElement('nav', null,
+  React.createElement(buttonExports.Button, { variant: 'tab', 'data-selected': true, id: 'selected' }, 'Dining room'),
+  React.createElement(buttonExports.Button, { variant: 'tab', 'data-selected': false, id: 'unselected' }, 'Terrace')));
+
 
 function stylesheet(file) {
   return readFileSync(file, 'utf8').replace(/@import\s+['"]([^'"]+)['"];?/g, (_, name) => {
@@ -31,10 +50,10 @@ function contrast(first, second) {
   const pair = [luminance(first), luminance(second)].sort((a, b) => b - a);
   return (pair[0] + .05) / (pair[1] + .05);
 }
-async function render(app, selection, dark = false) {
-  const result = await postcss([tailwind({ content: [{ raw: controls, extension: 'html' }], presets: app === 'pos' ? [preset] : undefined, corePlugins: { preflight: false } })])
-    .process(stylesheet(resolve(app, 'src/index.css')), { from: resolve(app, 'src/index.css') });
-  const dom = new JSDOM(`<html ${selection ? `data-ury-theme="${selection}"` : ''} class="${dark ? 'dark' : ''}"><body>${controls}</body></html>`);
+async function render(app, selection, dark = false, markup = controls, componentCss = '') {
+  const result = await postcss([tailwind({ content: [{ raw: markup, extension: 'html' }], presets: app === 'pos' ? [preset] : undefined, corePlugins: { preflight: false } })])
+    .process(stylesheet(resolve(app, 'src/index.css')) + componentCss, { from: resolve(app, 'src/index.css') });
+  const dom = new JSDOM(`<html ${selection ? `data-ury-theme="${selection}"` : ''} class="${dark ? 'dark' : ''}"><body>${markup}</body></html>`);
   const tokens = {};
   const priorities = {};
   result.root.walkRules((rule) => {
@@ -63,7 +82,36 @@ async function render(app, selection, dark = false) {
   style.textContent = css;
   dom.window.document.head.appendChild(style);
   const computed = (selector) => dom.window.getComputedStyle(dom.window.document.querySelector(selector));
-  return { tokens, computed };
+  // jsdom does not reliably apply selector specificity. For native state/backdrop
+  // colours, inspect matching emitted rules and apply their CSS cascade order.
+  const cascadeColor = (selector, property) => {
+    const element = dom.window.document.querySelector(selector);
+    const candidates = [];
+    postcss.parse(css).walkRules((rule) => {
+      if (rule.parent.type === 'atrule' && rule.parent.name === 'media') return;
+      const selectors = rule.selector.split(/,(?![^()]*\))/);
+      for (const candidate of selectors) {
+        let matches = false;
+        try { matches = element.matches(candidate); } catch { continue; }
+        if (!matches) continue;
+        const simple = candidate.replace(/\\./g, '_').replace(/:(?:is|not)\(([^()]*)\)/g, (_, arms) =>
+          arms.split(',').sort((a, b) => (b.match(/[.#[:]/g) || []).length - (a.match(/[.#[:]/g) || []).length)[0]);
+        const idCount = (simple.match(/#[\w-]+/g) || []).length;
+        const classCount = (simple.match(/\.[\w-]+|\[[^\]]+\]|:[\w-]+/g) || []).length;
+        const typeCount = (simple.replace(/#[\w-]+|\.[\w-]+|\[[^\]]+\]|:[\w-]+/g, '').match(/\b[a-zA-Z][\w-]*\b/g) || []).length;
+        rule.walkDecls(property, (decl) => candidates.push({ value: decl.value, score: idCount * 10000 + classCount * 100 + typeCount }));
+      }
+    });
+    const winner = candidates.sort((a, b) => a.score - b.score).at(-1);
+    assert.ok(winner, `Missing native ${property} for ${selector}`);
+    const sample = dom.window.document.createElement('span');
+    sample.style.setProperty(property, winner.value);
+    dom.window.document.body.appendChild(sample);
+    const color = dom.window.getComputedStyle(sample).getPropertyValue(property);
+    sample.remove();
+    return color;
+  };
+  return { tokens, computed, cascadeColor };
 }
 
 for (const app of ['pos', 'urypos', 'mosaic']) {
@@ -98,3 +146,27 @@ test('POS hospitality selection preserves existing dark palette and brand action
   }
   assert.equal((await render('pos', 'hospitality')).tokens['--primary'], (await render('pos', null)).tokens['--primary']);
 });
+
+for (const [selection, dark] of [[null, false], ['hospitality', false], ['hospitality', true]]) {
+  test(`native POS room tabs retain selected background and text: ${selection || 'default'} / ${dark ? 'dark' : 'light'}`, async () => {
+    const screen = await render('pos', selection, dark, nativeTabs);
+    for (const property of ['background-color', 'color']) {
+      assert.notEqual(screen.cascadeColor('#selected', property), screen.cascadeColor('#unselected', property),
+        `Selected room must remain visibly distinct in ${property}`);
+    }
+  });
+}
+for (const [app, file] of [['urypos', 'urypos/src/components/Menu.vue'], ['mosaic', 'mosaic/src/components/kot.vue']]) {
+  test(`${app}: native modal backdrop stays translucent while its card stays opaque`, async () => {
+    const source = readFileSync(file, 'utf8');
+    const backdropClass = source.match(/class="(fixed inset-0[^"\n]*bg-gray-100)"/)[1];
+    const cardClass = source.match(/class="([^"\n]*rounded-lg bg-white[^"\n]*)"/)[1];
+    const css = source.match(/<style[^>]*>([\s\S]*?)<\/style>/)[1];
+    const markup = `<div id="backdrop" class="${backdropClass}"><article id="card" class="${cardClass}">Native permission/menu dialog</article></div>`;
+    for (const selection of [null, 'hospitality']) {
+      const screen = await render(app, selection, false, markup, css);
+      assert.match(screen.cascadeColor('#backdrop', 'background-color'), /^rgba\([^)]*,\s*0\.[0-9]+\)$/, 'Native backdrop must retain alpha below 1');
+      assert.match(screen.cascadeColor('#card', 'background-color'), /^rgb\(/, 'Native modal card must remain opaque');
+    }
+  });
+}
