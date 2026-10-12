@@ -70,7 +70,7 @@
       <template v-for="kot in this.kot" :key="kot.name">
         <div v-if="!kot.showDiv && kot.production === production" class="kot-ticket masonry-item">
         <div
-          :class="[kot.color, { 'ring-4 ring-red-600': kot.late, 'kot-card-with-error': actionError }]"
+          :class="[kot.color, { 'ring-4 ring-red-600': kot.late }]"
           class="kot-card shadow-lg rounded-2xl"
         >
           <div class="check">
@@ -79,15 +79,15 @@
                 <div class="kot-identity text-sm">
                   <span
                     v-if="kot.tableortakeaway !== 'Takeaway'"
-                    class="text-sm font-medium text-[#6B7280]"
+                    class="text-sm font-medium text-[#6B7280] mr-1"
                     >Table
                   </span>
                   <span class="kot-table text-black-500 font-semibold">
                     {{ kot.tableortakeaway }}
-                    <span class="text-sm font-medium text-[#6B7280]"
+                    <span class="kot-user text-sm font-medium text-[#6B7280]"
                       >( {{ kot.user }} )</span
                     ></span
-                  ><br />
+                  >
                   <span v-if="kot.is_aggregator" class="text-sm font-medium text-[#6B7280]">Aggregator</span>
                   <span v-if="kot.is_aggregator" class="text-black-500 ml-2 font-semibold"
                     >{{ kot.customer_name }}
@@ -127,13 +127,13 @@
                 ( Duplicate KOT ( CHECK WITH CAPTAIN ) )
               </div>
               <div v-show="kot.comments" class="kot-note">
-                <span class="kot-note-label">Special request</span>
+                <span class="kot-note-label">{{ kot.type === 'Cancelled' || kot.type === 'Partially cancelled' ? 'Cancellation remarks' : 'Special request' }}</span>
                 ( {{ kot.comments }} )
               </div>
               <div></div>
               <div>
                 <div
-                  class="font-semibold justify-between items-center mt-2"
+                  class="font-semibold justify-between items-center"
                   v-for="kotitem in sortedKotItems(kot)"
                   :key="kotitem.name"
                 >
@@ -172,10 +172,10 @@
                       v-show="kotitem.comments"
                       class="kot-note"
                     >
-                      <span class="kot-note-label">Special request</span>
+                      <span class="kot-note-label">{{ kot.type === 'Cancelled' || kot.type === 'Partially cancelled' ? 'Cancellation remarks' : 'Special request' }}</span>
                       {{ kotitem.comments }}
                     </p>
-                    <hr class="my-1 border-gray-200 mt-2" />
+                    <hr class="my-1 border-gray-200" />
                   </div>
                 </div>
               </div>
@@ -809,34 +809,30 @@ export default {
   margin-bottom: 28px;
 }
 .kot-card {
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  /* Native header (81px), board padding (24px), Recall toolbar (60px),
-     and 35px clearance below the first row. */
-  max-height: calc(100dvh - 200px);
-}
-.kot-card-with-error {
-  /* Reserve a further 80px for the inline action-error banner. */
-  max-height: calc(100dvh - 280px);
-}
-.kot-card > .check {
-  min-height: 0;
-  overflow-y: auto;
 }
 .kot-header {
   gap: 8px;
   align-items: flex-start;
+  flex-wrap: wrap;
 }
-.kot-identity,
+.kot-identity {
+  overflow-wrap: normal;
+  flex: 1 0 min-content;
+}
 .kot-dish-detail {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 .kot-table {
-  display: block;
+  display: inline;
   font-size: 24px;
   line-height: 1.3;
+}
+.kot-user {
+  display: block;
 }
 .kot-age {
   flex-shrink: 0;
@@ -845,7 +841,6 @@ export default {
 }
 .kot-item {
   gap: 8px;
-  padding-top: 6px;
 }
 .kot-quantity {
   flex-shrink: 0;
@@ -855,21 +850,22 @@ export default {
 }
 .kot-dish {
   font-size: 20px;
-  line-height: 1.4;
+  line-height: 1.25;
 }
 .kot-note {
-  margin-top: 6px;
+  margin-top: 4px;
   padding: 4px 6px;
   border-left: 4px solid #b45309;
   background-color: #fffbeb;
   color: #111827;
   font-weight: 700;
   font-size: 18px;
-  line-height: 1.35;
+  line-height: 1.25;
   overflow-wrap: anywhere;
 }
 .kot-note-label {
-  display: block;
+  display: inline;
+  margin-right: 4px;
   font-size: 16px;
   line-height: 1.25;
 }
