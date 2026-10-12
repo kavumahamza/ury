@@ -36,8 +36,14 @@ def json_for_script(value):
 
 def get_brand_context(surface="site"):
     brand = get_brand(surface=surface)
+    hospitality_theme = (
+        "hospitality"
+        if surface == "staff" and frappe.conf.get("ury_hospitality_theme") == "hospitality"
+        else None
+    )
     return {
         "brand": brand,
+        "hospitality_theme": hospitality_theme,
         "brand_json": json_for_script(brand),
         "brand_source_url": frappe.conf.get("ury_source_url") or DEFAULT_SOURCE_URL,
     }

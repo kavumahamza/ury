@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ury-theme="{{ hospitality_theme or '' }}">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="{{ (brand.favicon if brand and brand.favicon else '/ury.ico') | e }}" />
@@ -13,6 +13,7 @@
       if (!window.frappe) window.frappe = {};
       if (!window.frappe.boot) window.frappe.boot = {};
       window.frappe.boot.ury_brand = {{ brand_json | safe }};
+      window.frappe.boot.ury_hospitality_theme = {{ hospitality_theme | tojson }};
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

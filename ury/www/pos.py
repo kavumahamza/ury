@@ -5,7 +5,7 @@ import frappe
 import frappe.sessions
 from frappe import _
 from frappe.utils.telemetry import capture
-from ury.brand import get_brand, get_brand_context, json_for_script
+from ury.brand import get_brand_context, json_for_script
 
 no_cache = 1
 
@@ -34,6 +34,7 @@ def get_context(context):
 		enabled = True
 	boot["server_script_enabled"] = enabled
 	boot["ury_brand"] = context["brand"]
+	boot["ury_hospitality_theme"] = context["hospitality_theme"]
 
 	boot_json = json_for_script(boot)
 	boot_json = SCRIPT_TAG_PATTERN.sub("", boot_json)
@@ -63,7 +64,9 @@ def get_boot():
 		raise frappe.SessionBootFailed from e
 
 	boot["push_relay_server_url"] = frappe.conf.get("push_relay_server_url")
-	boot["ury_brand"] = get_brand(surface="staff")
+	brand_context = get_brand_context(surface="staff")
+	boot["ury_brand"] = brand_context["brand"]
+	boot["ury_hospitality_theme"] = brand_context["hospitality_theme"]
 	boot_json = json_for_script(boot)
 	boot_json = SCRIPT_TAG_PATTERN.sub("", boot_json)
 

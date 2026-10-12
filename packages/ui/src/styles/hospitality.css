@@ -1,0 +1,82 @@
+/* Fixed staff-page opt-in. Existing theme.css remains the default and dark
+   authority; these semantic overrides are shared by React and legacy Vue. */
+@layer base {
+  html[data-ury-theme="hospitality"]:not(.dark) {
+    --background: 38 38% 94%;
+    --foreground: 24 18% 15%;
+    --card: 40 45% 99%;
+    --card-foreground: 24 18% 15%;
+    --popover: 40 45% 99%;
+    --popover-foreground: 24 18% 15%;
+    --secondary: 34 26% 90%;
+    --secondary-foreground: 24 18% 15%;
+    --muted: 34 26% 90%;
+    --muted-foreground: 26 10% 37%;
+    --accent: 34 26% 90%;
+    --accent-foreground: 24 18% 15%;
+    --border: 30 20% 78%;
+    --input: 30 20% 78%;
+    --gray-50: 40 45% 99%;
+    --gray-100: 38 38% 94%;
+    --gray-200: 30 20% 78%;
+    --gray-500: 26 10% 37%;
+    --gray-600: 26 12% 30%;
+    --gray-700: 24 16% 24%;
+    --gray-800: 24 18% 19%;
+    --gray-900: 24 18% 15%;
+    /* React inherits its brand primary. Legacy Vue has no semantic primary,
+       so its focus fallback uses the existing Maximus purple, not a new accent. */
+    --ring: var(--primary, 263.8095 96.9231% 61.7647%);
+  }
+
+  @media (prefers-color-scheme: light) {
+    html[data-ury-theme="hospitality"]:not(.dark) body {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+    }
+    html[data-ury-theme="hospitality"]:not(.dark) :is(h1, h2, h3) {
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+@layer utilities {
+  /* Legacy apps use neutral Tailwind utilities rather than @ury/ui tokens.
+     Adapt neutrals only; red/green/blue operational states stay native.
+     The media guard retains their existing system-dark utilities. */
+  @media (prefers-color-scheme: light) {
+    html[data-ury-theme="hospitality"]:not(.dark) :is(.bg-gray-50, .bg-white) {
+      background-color: hsl(var(--card));
+    }
+    html[data-ury-theme="hospitality"]:not(.dark) :is(.bg-gray-100, .bg-slate-300) {
+      background-color: hsl(var(--background));
+    }
+    html[data-ury-theme="hospitality"]:not(.dark) :is(.text-gray-500, .text-gray-600) {
+      color: hsl(var(--muted-foreground));
+    }
+    html[data-ury-theme="hospitality"]:not(.dark) :is(.text-gray-700, .text-gray-800, .text-gray-900) {
+      color: hsl(var(--foreground));
+    }
+    html[data-ury-theme="hospitality"]:not(.dark) :is(.border-gray-200, .border-gray-300) {
+      border-color: hsl(var(--border));
+    }
+  }
+
+  html[data-ury-theme="hospitality"] :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html[data-ury-theme="hospitality"] *:not(.animate-spin),
+    html[data-ury-theme="hospitality"] *::before,
+    html[data-ury-theme="hospitality"] *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

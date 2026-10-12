@@ -1,3 +1,4 @@
+@import '../../packages/ui/src/styles/hospitality.css';
 @import '@ury/ui/styles/theme.css';
 
 @tailwind base;
