@@ -344,3 +344,18 @@ describe('Outstanding settlement working area', () => {
     expect(container.textContent).toContain('Check unavailable');
   });
 });
+
+describe('cashier workspace reading order', () => {
+  it('keeps the selected bill in workspace flow before general alerts', async () => {
+    const actions = await renderOrders();
+    const detail = actions.parentElement!;
+    const alerts = container.querySelector('[aria-label="Notifications"]')!;
+    // A fixed bill panel overlays the available tablet workspace. Normal-flow
+    // panels can resize together and retain the queue/detail/alert reading order.
+    expect(getComputedStyle(detail).position).not.toBe('fixed');
+    expect(detail.parentElement!.contains(alerts)).toBe(true);
+    expect(detail.compareDocumentPosition(alerts) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(buttonIn(actions, 'Settle bill')).toBeDefined();
+    expect(detail.textContent).toContain('Soup');
+  });
+});
