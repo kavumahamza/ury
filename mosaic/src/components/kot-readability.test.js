@@ -89,7 +89,7 @@ test("table identity leads the ticket at kitchen working distance", async t => {
 test("elapsed time is readable and late state stays explicit", async t => {
   const { host } = fixture(t);
   await Vue.nextTick();
-  assert.ok(pixels(findText(host, "0 : 18")) >= 28, "Elapsed time needs at least 28px type");
+  assert.ok(pixels(findText(host, "18 min")) >= 28, "Elapsed time needs at least 28px type");
   assert.ok(findText(host, "LATE"));
 });
 
@@ -167,4 +167,37 @@ test("native Confirm button does not bubble into the footer dismiss gesture", as
   findText(host, "Confirm").click(); await Vue.nextTick();
   assert.equal(vm.kot[0].isRotated, true, "Button activation must remain separate from background dismissal");
   assert.deepEqual(requests, [{ method: "ury.ury.api.ury_kot_display.confirm_cancel_kot", args: { name: "KOT-041" } }]);
+});
+
+const luminance = color => {
+  const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => {
+    const normalized = value / 255;
+    return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+};
+test("all preparation and order notes are emphasized at high contrast without classifying their text", async t => {
+  const { host, vm } = fixture(t);
+  for (const message of ["NO PEANUTS", "Bring sauce separately", "Serve together"]) {
+    vm.kot[0].comments = message;
+    vm.kot[0].kot_items[0].comments = message;
+    await Vue.nextTick();
+    const notes = [...host.querySelectorAll(".kot-note")];
+    assert.equal(notes.length, 2);
+    for (const note of notes) {
+      assert.match(note.textContent, new RegExp(message));
+      const computed = window.getComputedStyle(note);
+      assert.ok(Number(computed.fontWeight) >= 600, "Every note must be emphasized");
+      assert.ok((1.05 / (luminance(computed.color) + 0.05)) >= 7, "Every note needs high contrast against the light ticket surface");
+    }
+  }
+});
+test("elapsed labels distinguish hours and minutes without changing timing state", async t => {
+  const { host, vm } = fixture(t);
+  for (const [value, label] of [["0 : 18", "18 min"], ["1 : 18", "1 h 18 min"]]) {
+    vm.kot[0].timeRemaining = value;
+    await Vue.nextTick();
+    assert.ok(findText(host, label));
+    assert.equal(vm.kot[0].timeRemaining, value);
+  }
 });
