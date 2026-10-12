@@ -1,0 +1,135 @@
+[
+  {
+    "name": "kitchen-before-1366",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=before&w=1366&h=768",
+    "source_sha": "1e690ffaef45a46b4306e2e9f674fdb71bb6e693",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:28.824039+00:00",
+    "bytes": 121955,
+    "sha256": "78dac46d7cfdcc76450a58b1d7fdd5f01cc849335dd3913ef23eed0353a8c7ea",
+    "path": "kitchen-before-1366.png"
+  },
+  {
+    "name": "kitchen-after-1366",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=after&w=1366&h=768",
+    "source_sha": "9a9ade8a691a7d1c39223f22a3e0ee564343c622",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:29.426702+00:00",
+    "bytes": 135068,
+    "sha256": "57da2f528fb5c08e079073c18da755a77b50e50d5a57a48612d8fbbec6e03e84",
+    "path": "kitchen-after-1366.png"
+  },
+  {
+    "name": "kitchen-after-1024",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=after&w=1024&h=768",
+    "source_sha": "9a9ade8a691a7d1c39223f22a3e0ee564343c622",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1098,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:30.003112+00:00",
+    "bytes": 109862,
+    "sha256": "db000b7673ad970aebaecc4601e55e372f29894ca08a2d3445b11aacb2db0edf",
+    "path": "kitchen-after-1024.png"
+  },
+  {
+    "name": "kitchen-empty-1366",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=after&w=1366&h=768&state=empty",
+    "source_sha": "9a9ade8a691a7d1c39223f22a3e0ee564343c622",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:30.565557+00:00",
+    "bytes": 47101,
+    "sha256": "d58917da1a7e25ed63c902008bddff96795103ca0908f2ece488f1656aa465b7",
+    "path": "kitchen-empty-1366.png"
+  },
+  {
+    "name": "kitchen-undo-1366",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=after&w=1366&h=768&state=undo",
+    "source_sha": "9a9ade8a691a7d1c39223f22a3e0ee564343c622",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:31.142062+00:00",
+    "bytes": 137762,
+    "sha256": "90f3c3738a21a06c778bc1e61544416f939c6ab3a83029cfdbd6b0b2aa427799",
+    "path": "kitchen-undo-1366.png"
+  },
+  {
+    "name": "kitchen-highlighted-1366",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=after&w=1366&h=768&state=highlighted",
+    "source_sha": "9a9ade8a691a7d1c39223f22a3e0ee564343c622",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:31.731914+00:00",
+    "bytes": 135313,
+    "sha256": "189c1634bf2bbac00607e8f3fb023ad5966540fe5b877450e0170a32ee454bc1",
+    "path": "kitchen-highlighted-1366.png"
+  },
+  {
+    "name": "kitchen-failure-1366",
+    "group": "kitchen",
+    "url": "http://localhost:5185/viewport.html?revision=after&w=1366&h=768&state=failure",
+    "source_sha": "9a9ade8a691a7d1c39223f22a3e0ee564343c622",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:37:32.346309+00:00",
+    "bytes": 132422,
+    "sha256": "a3054d8cc4aedb388d0d145869b366b96100ab8070999cf4c28ddf8333a95a64",
+    "path": "kitchen-failure-1366.png"
+  }
+]
