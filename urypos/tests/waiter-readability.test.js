@@ -35,12 +35,12 @@ beforeEach(() => {
     { name: 'Table 01', occupied: 0, state: 'Free' },
     { name: 'Garden Terrace 02', occupied: 1, state: 'Occupied', age: '0:08' },
     { name: 'Table 03', occupied: 1, state: 'Attention', age: '0:27' },
-    { name: 'Table 04', occupied: 1, state: 'Billed', age: '0:18' },
+    { name: 'Table 04', occupied: 1, state: 'Active', age: '0:18' },
   ];
   state.auth = reactive({ cashier: false, viewItemImage: true, restrictTableOrder: false, removeTableOrderItem: 1 });
   state.table = reactive({
     tables, filteredTables: tables, rooms: [{ name: 'Dining' }], selectedRoom: 'Dining',
-    getBadgeText: row => row.state, getBadgeType: row => ({ Free: 'green', Occupied: 'yellow', Attention: 'red', Billed: 'default' })[row.state],
+    getBadgeText: row => row.state, getBadgeType: row => ({ Free: 'green', Occupied: 'yellow', Attention: 'red', Active: 'default' })[row.state],
     getTimeDifference: row => row.age, addToSelectedTables: vi.fn(), routeToMenu: vi.fn(), routeToCart: vi.fn(),
     handleRoomChange: vi.fn(), toggleTableTypeSwitch: vi.fn(), toggleDropdown: vi.fn(),
   });
@@ -91,9 +91,9 @@ it('exposes occupied table navigation and cart viewing as named keyboard control
   cart.click();
   expect(state.table.routeToCart).toHaveBeenCalledWith(state.table.tables[1]);
 });
-it('retains free/occupied/attention/billed labels and native free-table and billing actions', () => {
+it('retains free/occupied/attention/active labels and native free-table and billing actions', () => {
   mount(Table);
-  for (const label of ['Free', 'Occupied', 'Attention', 'Billed', '0:27']) expect(host.textContent).toContain(label);
+  for (const label of ['Free', 'Occupied', 'Attention', 'Active', '0:27']) expect(host.textContent).toContain(label);
   buttonNamed('Open Table').click();
   expect(state.table.addToSelectedTables).toHaveBeenCalledWith(state.table.tables[0]);
   buttonNamed('Bill').click();
@@ -130,7 +130,7 @@ it('keeps every add and quantity action touchable with visible keyboard focus', 
     expect(touchHeight(button)).toBeGreaterThanOrEqual(44);
     // Native utility generation must contain a :focus-visible ring for each control.
     const focusedRules = [...document.styleSheets].flatMap(sheet => [...sheet.cssRules])
-      .filter(rule => rule.selectorText?.includes(':focus-visible') && rule.style.boxShadow)
+      .filter(rule => rule.selectorText?.includes(':focus-visible') && rule.style.getPropertyValue('box-shadow'))
       .some(rule => button.className.split(/\s+/).some(token => rule.selectorText.startsWith(`.${token.replaceAll(':', '\\:')}:`)));
     expect(focusedRules).toBe(true);
   }
