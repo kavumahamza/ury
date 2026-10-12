@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto p-6 mb-16 relative">
+  <div class="kot-board mx-auto p-6 mb-16 relative">
     <div v-if="socketStale" role="status" class="fixed bottom-0 inset-x-0 p-3 bg-red-600 text-white text-center z-50">
       Realtime offline or resyncing — board may be stale.
     </div>
@@ -65,56 +65,29 @@
     </div>
 
     <div
-      class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      class="grid kot-grid"
     >
-      <div v-for="kot in this.kot" :key="kot.name">
+      <template v-for="kot in this.kot" :key="kot.name">
+        <div v-if="!kot.showDiv && kot.production === production" class="kot-ticket masonry-item">
         <div
           :class="[kot.color, { 'ring-4 ring-red-600': kot.late }]"
-          class="inline-block shadow-lg gap-4 p-3 rounded-2xl w-90 h-auto masonry-item"
-          style="margin-top: 28px"
-          v-if="!kot.showDiv && kot.production === production"
+          class="kot-card shadow-lg rounded-2xl"
         >
-          <div class="w-64 check">
-            <div
-              :class="[{ hidden: !kot.isRotated }]"
-              @click="rotateCard(kot)"
-              class="absolute inset-0 bg-white z-50 opacity-80 rounded-2xl flex flex-col justify-center items-center"
-            >
-              <button
-                @click.stop="
-                  kot.type === 'Cancelled' || kot.type === 'Partially cancelled'
-                    ? confirmOrder(kot)
-                    : serveOrder(kot)
-                "
-                :class="[{ hidden: !kot.isRotated }]"
-                :disabled="!!pendingServes[kot.name] || !!confirming[kot.name]"
-                class="py-2 px-6 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 ease-in-out"
-              >
-                {{
-                  kot.type === "Cancelled" || kot.type === "Partially cancelled"
-                    ? "Confirm"
-                    : "Serve"
-                }}
-              </button>
-            </div>
-
-            
-              <!-- Serve Button -->
-
+          <div class="check">
               <!-- Card Header: Table Name and Order Number -->
-              <div class="flex justify-between" @click="rotateCard(kot)">
-                <div class="text-sm w-48">
+              <div class="kot-header flex justify-between" @click="rotateCard(kot)">
+                <div class="kot-identity text-sm">
                   <span
                     v-if="kot.tableortakeaway !== 'Takeaway'"
-                    class="text-sm font-medium text-[#6B7280]"
+                    class="text-sm font-medium text-[#6B7280] mr-1"
                     >Table
                   </span>
-                  <span class="text-black-500 font-semibold">
+                  <span class="kot-table text-black-500 font-semibold">
                     {{ kot.tableortakeaway }}
-                    <span class="text-sm font-medium text-[#6B7280]"
+                    <span class="kot-user text-sm font-medium text-[#6B7280]"
                       >( {{ kot.user }} )</span
                     ></span
-                  ><br />
+                  >
                   <span v-if="kot.is_aggregator" class="text-sm font-medium text-[#6B7280]">Aggregator</span>
                   <span v-if="kot.is_aggregator" class="text-black-500 ml-2 font-semibold"
                     >{{ kot.customer_name }}
@@ -140,25 +113,27 @@
                 </div>
                 <div
                   :class="kot.timecolor"
-                  class="font-inter font-semibold text-2xl leading-10"
+                  class="kot-age font-inter font-semibold leading-10"
                 >
-                  {{ kot.timeRemaining }}
+                  {{ Number((kot.timeRemaining || '0:0').split(':')[0]) ? Number((kot.timeRemaining || '0:0').split(':')[0]) + ' h ' : '' }}{{ String(Number((kot.timeRemaining || '0:0').split(':')[1])).padStart(Number((kot.timeRemaining || '0:0').split(':')[0]) ? 2 : 1, '0') }} min
                   <span v-if="kot.late" class="block text-sm text-red-700 leading-4">LATE</span>
                 </div>
               </div>
+              <p v-if="kot.type === 'Order Modified'" class="font-semibold mt-2">Order Modified</p>
               <div
                 v-if="kot.type === 'Duplicate'"
                 class="text-[#DC0000] font-medium"
               >
                 ( Duplicate KOT ( CHECK WITH CAPTAIN ) )
               </div>
-              <div v-show="kot.comments" class="text-[#6B7280] font-medium">
+              <div v-show="kot.comments" class="kot-note">
+                <span class="kot-note-label">{{ kot.type === 'Cancelled' || kot.type === 'Partially cancelled' ? 'Cancellation remarks' : 'Special request' }}</span>
                 ( {{ kot.comments }} )
               </div>
               <div></div>
               <div>
                 <div
-                  class="font-semibold justify-between items-center mt-2"
+                  class="font-semibold justify-between items-center"
                   v-for="kotitem in sortedKotItems(kot)"
                   :key="kotitem.name"
                 >
@@ -171,10 +146,13 @@
                     :class="{
                       'line-through text-green-700': kotitem.striked,
                     }"
-                    class="flex font-semibold justify-between items-center"
+                    class="kot-item flex font-semibold items-start"
                   >
-                    <div>
-                      <span class="ml-2 text-black-100">{{
+                    <div class="kot-quantity">
+                      <span>{{ kotitem.qty }}</span>
+                    </div>
+                    <div class="kot-dish-detail">
+                      <span class="kot-dish text-black-100">{{
                         kotitem.item_name
                       }}<span v-show="kotitem.indicate_course" class="text-sm text-gray-500 ml-1"> ( {{kotitem.course}} )</span>
                       </span
@@ -188,29 +166,42 @@
                         >[Old Qty = {{ kotitem.quantity }}]</span
                       >
                     </div>
-                    <div>
-                      <span class="ml-2 text-black-100">{{ kotitem.qty }}</span>
-                    </div>
                   </div>
                   <div>
                     <p
                       v-show="kotitem.comments"
-                      class="ml-2 text-[#6B7280] font-medium"
+                      class="kot-note"
                     >
+                      <span class="kot-note-label">{{ kot.type === 'Cancelled' || kot.type === 'Partially cancelled' ? 'Cancellation remarks' : 'Special request' }}</span>
                       {{ kotitem.comments }}
                     </p>
-                    <hr class="my-1 border-gray-200 mt-2" />
+                    <hr class="my-1 border-gray-200" />
                   </div>
                 </div>
               </div>
             
           </div>
-          <div v-if="pendingServes[kot.name]" class="mt-3 flex justify-between items-center text-blue-700">
-            <span>{{ pendingServes[kot.name].sending ? "Serving…" : "Serving in 5 seconds…" }}</span>
-            <button v-if="!pendingServes[kot.name].sending" @click.stop="undoServe(kot)" class="rounded border border-blue-600 px-3 py-1 font-semibold">Undo</button>
-          </div>
+          <footer @click.self="kot.isRotated && rotateCard(kot)" class="kot-actions mt-4 border-t border-gray-200 pt-4" :class="{ 'ring-2 ring-blue-600 rounded-lg': kot.isRotated }">
+            <button
+              v-if="!pendingServes[kot.name]"
+              @click.stop="
+                kot.type === 'Cancelled' || kot.type === 'Partially cancelled'
+                  ? confirmOrder(kot)
+                  : serveOrder(kot)
+              "
+              :disabled="!!pendingServes[kot.name] || !!confirming[kot.name]"
+              class="w-full py-2 px-6 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {{ kot.type === "Cancelled" || kot.type === "Partially cancelled" ? "Confirm" : "Serve" }}
+            </button>
+            <div v-if="pendingServes[kot.name]" class="flex justify-between items-center gap-3 text-blue-700">
+              <span>{{ pendingServes[kot.name].sending ? "Serving…" : "Serving in 5 seconds…" }}</span>
+              <button v-if="!pendingServes[kot.name].sending" @click.stop="undoServe(kot)" class="rounded border border-blue-600 px-3 py-1 font-semibold">Undo</button>
+            </div>
+          </footer>
         </div>
-      </div>
+        </div>
+      </template>
     </div>
 
     <!-- Audio Alert Message -->
@@ -809,5 +800,97 @@ export default {
 <style>
 .bg-gray-100 {
   background-color: rgba(0, 0, 0, 0.2);
+}
+.kot-grid {
+  display: block;
+}
+.kot-ticket {
+  width: 100%;
+  margin-bottom: 28px;
+}
+.kot-card {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.kot-header {
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.kot-identity {
+  overflow-wrap: normal;
+  flex: 1 0 min-content;
+}
+.kot-dish-detail {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.kot-table {
+  display: inline;
+  font-size: 24px;
+  line-height: 1.3;
+}
+.kot-user {
+  display: block;
+}
+.kot-age {
+  flex-shrink: 0;
+  font-size: 28px;
+  white-space: nowrap;
+}
+.kot-item {
+  gap: 8px;
+}
+.kot-quantity {
+  flex-shrink: 0;
+  min-width: 2ch;
+  font-size: 24px;
+  line-height: 1.4;
+}
+.kot-dish {
+  font-size: 20px;
+  line-height: 1.25;
+}
+.kot-note {
+  margin-top: 4px;
+  padding: 4px 6px;
+  border-left: 4px solid #b45309;
+  background-color: #fffbeb;
+  color: #111827;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.kot-note-label {
+  display: inline;
+  margin-right: 4px;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.kot-actions {
+  flex-shrink: 0;
+  margin-top: 8px;
+  padding-top: 8px;
+  font-size: 18px;
+}
+.kot-board button {
+  min-height: 44px;
+}
+@media (min-width: 768px) {
+  .kot-ticket {
+    width: calc((100% - 28px) / 2);
+  }
+}
+@media (min-width: 1024px) {
+  .kot-ticket {
+    width: calc((100% - 56px) / 3);
+  }
+}
+@media (min-width: 1280px) {
+  .kot-ticket {
+    width: calc((100% - 84px) / 4);
+  }
 }
 </style>
