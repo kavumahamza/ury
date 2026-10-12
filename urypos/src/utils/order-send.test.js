@@ -149,6 +149,20 @@ test("missing Pax asks only for Pax and does not send", async () => {
   assert.equal(state.invoiceUpdating, false);
 });
 
+test("an unselected cashier takeaway order type retains the cart and asks for a selection", async () => {
+  const { state, events } = fixture(true);
+  state.table.selectedTable = "";
+  state.menu.selectedOrderType = null;
+  state.recentOrders.pastOrderType = null;
+  await state.invoiceCreation();
+  assert.deepEqual(events.alerts, ["Please Select Order Type"]);
+  assert.equal(events.posts.length, 0);
+  assert.equal(state.menu.selectedOrderType, null);
+  assert.equal(state.menu.cart.length, 1);
+  assert.deepEqual(events.routes, []);
+  assert.equal(state.invoiceUpdating, false);
+});
+
 for (const { cashier, route, outcome } of [
   { cashier: false, route: "/Table", outcome: "waiter/captain sends clear the cart and return to Tables" },
   { cashier: true, route: "/recentOrder", outcome: "cashier sends clear the cart and open the sent check for tender" },
