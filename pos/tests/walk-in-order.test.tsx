@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { showToast } from '@ury/ui';
 import { initI18n } from '../src/i18n';
 import OrderPanel from '../src/components/OrderPanel';
-import { syncOrder } from '../src/lib/order-api';
+import { syncOrder, type POSInvoice } from '../src/lib/order-api';
 
 const state = vi.hoisted(() => ({
   activeOrders: [{ id: 'SOUP', uniqueId: 'ROW-1', name: 'Soup', price: 18000, quantity: 1 }],
@@ -27,6 +27,12 @@ vi.mock('../src/components/ProductDialog', () => ({ default: () => null }));
 vi.mock('../src/components/OrderTypeSelect', () => ({ default: () => null }));
 vi.mock('../src/components/CommentDialog', () => ({ default: () => null }));
 vi.mock('../src/components/OrderTabs', () => ({ default: () => null }));
+const invoice: POSInvoice = {
+  name: 'INV-1', title: 'Order', customer: 'Configured Customer', customer_name: 'Configured Customer',
+  mobile_number: '', customer_group: 'Individual', territory: 'Uganda', posting_date: '2026-10-13', posting_time: '10:00:00',
+  order_type: 'Take Away', restaurant_table: '', custom_restaurant_room: 'Dining', status: 'Draft',
+  total: 18000, grand_total: 18000, rounded_total: 18000, items: [],
+};
 let host: HTMLDivElement;
 let root: Root;
 beforeEach(async () => {
@@ -35,7 +41,7 @@ beforeEach(async () => {
   Object.assign(state, { selectedOrderType: 'Take Away', selectedTable: null, selectedCustomer: null,
     selectedAggregator: null, isUpdatingOrder: false, disabled: false, user: { name: 'waiter@example.com' } });
   vi.clearAllMocks();
-  vi.mocked(syncOrder).mockResolvedValue({ message: { status: 'Success' } });
+  vi.mocked(syncOrder).mockResolvedValue({ message: invoice });
   vi.spyOn(showToast, 'error').mockImplementation(() => {});
   vi.spyOn(showToast, 'success').mockImplementation(() => {});
   host = document.createElement('div'); document.body.append(host); root = createRoot(host);
@@ -102,7 +108,7 @@ it('disables submission and Pax while pending and prevents a second ordinary cli
   await submit(); expect(submitButton().disabled).toBe(true);
   expect([...host.querySelectorAll('button')].filter(button => ['+', '-'].includes(button.textContent || '')).every(button => button.disabled)).toBe(true);
   await act(async () => submitButton().click()); expect(syncOrder).toHaveBeenCalledOnce();
-  await act(async () => finish({ message: { status: 'Success' } })); expect(state.resetOrderState).toHaveBeenCalledOnce();
+  await act(async () => finish({ message: invoice })); expect(state.resetOrderState).toHaveBeenCalledOnce();
 });
 it('preserves the session guard', async () => {
   state.user = null; vi.spyOn(console, 'error').mockImplementation(() => {}); await submit();
