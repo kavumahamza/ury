@@ -1,0 +1,62 @@
+[
+  {
+    "name": "theme-default-1366",
+    "url": "http://127.0.0.1:5183/viewport.html?width=1366&height=768",
+    "source_sha": "81e96d7ff1e93e3e2a9651d85ae7591150870b09",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:35:39.261097+00:00",
+    "bytes": 197192,
+    "sha256": "d9654abad30ce5c90cbf487db0825460daeffac399ad9ae31d6a58a6674ac63d",
+    "file": "theme-default-1366.png",
+    "requested_mode": "default/light",
+    "verification_limit": "Local native component/CSS rendering with synthetic records; not live role, branding, device, CSP or deployment acceptance."
+  },
+  {
+    "name": "theme-hospitality-1366",
+    "url": "http://127.0.0.1:5183/viewport.html?width=1366&height=768&theme=hospitality",
+    "source_sha": "81e96d7ff1e93e3e2a9651d85ae7591150870b09",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:35:40.080172+00:00",
+    "bytes": 202910,
+    "sha256": "61acda8ebc8ea97f47218c5768aac918927aacaa4f873c75e20505877f9cdf93",
+    "file": "theme-hospitality-1366.png",
+    "requested_mode": "hospitality/light",
+    "verification_limit": "Local native component/CSS rendering with synthetic records; not live role, branding, device, CSP or deployment acceptance."
+  },
+  {
+    "name": "theme-dark-1366",
+    "url": "http://127.0.0.1:5183/viewport.html?width=1366&height=768&theme=hospitality&dark",
+    "source_sha": "81e96d7ff1e93e3e2a9651d85ae7591150870b09",
+    "dataset": "synthetic local actual native source",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:35:40.898501+00:00",
+    "bytes": 198087,
+    "sha256": "a08234ba5037c7d9c1ef7a3f333d7760bdac67f01e32bddbc164bb36173cd47a",
+    "file": "theme-dark-1366.png",
+    "requested_mode": "hospitality/dark-class control",
+    "verification_limit": "Local native component/CSS rendering with synthetic records; not live role, branding, device, CSP or deployment acceptance. Requested dark-query control has a default-looking shell; complete dark-mode appearance and activation are not established by this image."
+  }
+]
