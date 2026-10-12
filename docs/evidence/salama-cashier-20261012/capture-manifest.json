@@ -1,0 +1,71 @@
+[
+  {
+    "name": "cashier-before-1366",
+    "group": "cashier",
+    "url": "http://127.0.0.1:5181/viewport.html?width=1366&height=768",
+    "source_sha": "1e690ffaef45a46b4306e2e9f674fdb71bb6e693",
+    "dataset": "Synthetic local cashier bills and native notifications; actual POS source and CSS",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:31:04.199715+00:00",
+    "bytes": 197116,
+    "sha256": "a7509c77fc0172cb883a1b374d0b16561f4927ede3656a2e77c539669b4bd41d",
+    "path": "cashier-before-1366.png",
+    "wrapper_browser_label": {
+      "width": 1440,
+      "height": 773
+    }
+  },
+  {
+    "name": "cashier-after-1366",
+    "group": "cashier",
+    "url": "http://127.0.0.1:5182/viewport.html?width=1366&height=768",
+    "source_sha": "64a92b4e7f93b22a3ef5f8bde62f7a4c940e184e",
+    "dataset": "Synthetic local cashier bills and native notifications; actual POS source and CSS",
+    "native_viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1440,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:31:07.237808+00:00",
+    "bytes": 178044,
+    "sha256": "cc2dbbb8a70fc93dabef2fb995296f5d5b6c1785be9184c2c51a5ed69cc4d686",
+    "path": "cashier-after-1366.png",
+    "wrapper_browser_label": {
+      "width": 1440,
+      "height": 773
+    }
+  },
+  {
+    "name": "cashier-after-1024",
+    "group": "cashier",
+    "url": "http://127.0.0.1:5182/viewport.html?width=1024&height=768",
+    "source_sha": "64a92b4e7f93b22a3ef5f8bde62f7a4c940e184e",
+    "dataset": "Synthetic local cashier bills and native notifications; actual POS source and CSS",
+    "native_viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "image_size": {
+      "width": 1098,
+      "height": 860
+    },
+    "captured_at": "2026-10-12T16:31:08.118084+00:00",
+    "bytes": 128491,
+    "sha256": "9236ef6e456fa0242e6779beac66ef3533947e670a25983a417c0f2bb0c5cca7",
+    "path": "cashier-after-1024.png",
+    "wrapper_browser_label": {
+      "width": 1098,
+      "height": 773
+    }
+  }
+]
