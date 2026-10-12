@@ -1,8 +1,8 @@
 # Hospitality selection source contract
 
 Approved by delivery parent 12 October 2026 before production implementation.
-Existing Frappe site-config field: `ury_hospitality_theme` is new source contract,
-with exactly one admitted value: `"hospitality"`. It is not a native DocType setting.
+New site-config key `ury_hospitality_theme` uses the existing Frappe context seam
+and admits exactly one value: `"hospitality"`. It is not a native DocType setting.
 `ury.brand.get_brand_context(surface="staff")` accepts only that exact string;
 missing, null, empty, `off`, dictionaries, arbitrary URLs and all other values
 resolve to None. Public/default brand context and guest `/order` ignore it.
@@ -13,9 +13,10 @@ No new endpoints, settings owner, URL loader or CSS service.
 
 All three existing index.css files import the same framework-neutral built-in
 `packages/ui/src/styles/hospitality.css`. Original React theme.css is untouched.
-Warm semantic overrides use existing @ury/ui token names. Legacy neutral utility
-adapters and system-serif headings apply only on light devices; original Vue
-system-dark classes remain the authority. Explicit `.dark` retains existing React
+Warm semantic overrides use existing @ury/ui token names. The existing Mosaic
+root canvas adapter and system-serif headings apply only on light devices; native
+modal, card and control utilities retain their colours. Original Vue system-dark
+classes remain the authority. Explicit `.dark` retains existing React
 tokens. Brand primary/actions and operational red/green/blue states are native.
 Existing body fonts are retained; no font asset or remote URL is introduced.
 

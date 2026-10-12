@@ -43,24 +43,12 @@
 }
 
 @layer utilities {
-  /* Legacy apps use neutral Tailwind utilities rather than @ury/ui tokens.
-     Adapt neutrals only; red/green/blue operational states stay native.
-     The media guard retains their existing system-dark utilities. */
+  /* Mosaic's existing App.vue main canvas is a direct child of #app.
+     Utility colours elsewhere remain native, including modal backdrops and
+     selected/hover/active controls. React already consumes the shared tokens. */
   @media (prefers-color-scheme: light) {
-    html[data-ury-theme="hospitality"]:not(.dark) :is(.bg-gray-50, .bg-white) {
-      background-color: hsl(var(--card));
-    }
-    html[data-ury-theme="hospitality"]:not(.dark) :is(.bg-gray-100, .bg-slate-300) {
+    html[data-ury-theme="hospitality"]:not(.dark) #app > .bg-slate-300 {
       background-color: hsl(var(--background));
-    }
-    html[data-ury-theme="hospitality"]:not(.dark) :is(.text-gray-500, .text-gray-600) {
-      color: hsl(var(--muted-foreground));
-    }
-    html[data-ury-theme="hospitality"]:not(.dark) :is(.text-gray-700, .text-gray-800, .text-gray-900) {
-      color: hsl(var(--foreground));
-    }
-    html[data-ury-theme="hospitality"]:not(.dark) :is(.border-gray-200, .border-gray-300) {
-      border-color: hsl(var(--border));
     }
   }
 
