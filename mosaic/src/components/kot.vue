@@ -70,7 +70,7 @@
       <template v-for="kot in this.kot" :key="kot.name">
         <div v-if="!kot.showDiv && kot.production === production" class="kot-ticket masonry-item">
         <div
-          :class="[kot.color, { 'ring-4 ring-red-600': kot.late }]"
+          :class="[kot.color, { 'ring-4 ring-red-600': kot.late, 'kot-card-with-error': actionError }]"
           class="kot-card shadow-lg rounded-2xl"
         >
           <div class="check">
@@ -810,7 +810,13 @@ export default {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  max-height: calc(100dvh - 140px);
+  /* Native header (81px), board padding (24px), Recall toolbar (60px),
+     and 35px clearance below the first row. */
+  max-height: calc(100dvh - 200px);
+}
+.kot-card-with-error {
+  /* Reserve a further 80px for the inline action-error banner. */
+  max-height: calc(100dvh - 280px);
 }
 .kot-card > .check {
   min-height: 0;
