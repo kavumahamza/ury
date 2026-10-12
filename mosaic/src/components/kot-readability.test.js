@@ -201,3 +201,24 @@ test("elapsed labels distinguish hours and minutes without changing timing state
     assert.equal(vm.kot[0].timeRemaining, value);
   }
 });
+
+test("long-ticket height reserves native header, toolbar and action-error space", async t => {
+  const { host, vm } = fixture(t);
+  await Vue.nextTick();
+  const card = host.querySelector(".kot-card");
+  const reserve = () => {
+    const value = window.getComputedStyle(card).maxHeight;
+    const match = value.match(/calc\(100dvh - (\d+)px\)/);
+    assert.ok(match, "Card height must be bounded against the viewport");
+    return Number(match[1]);
+  };
+  // Native Header + board padding + Recall toolbar place the first row at 165px.
+  // Keep 24px below that row so its footer and late ring remain inside768px.
+  assert.ok(reserve() >= 189, "Native header and Recall toolbar must fit above the card");
+  const normalReserve = reserve();
+  vm.actionError = "Synthetic network unavailable";
+  await Vue.nextTick();
+  assert.ok(reserve() >= normalReserve + 80, "The action error must not push native actions below the screen");
+  assert.equal(window.getComputedStyle(host.querySelector(".check")).overflowY, "auto");
+  assert.equal(window.getComputedStyle(host.querySelector("footer")).flexShrink, "0");
+});
